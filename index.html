@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignaSN — Plateforme Citoyenne de Signalement au Sénégal 🇸🇳</title>
+    <style>
+        :root {
+            --vert-sn: #00853F;
+            --jaune-sn: #FDEF42;
+            --rouge-sn: #E31B23;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f6f8;
+            color: #333;
+        }
+        header {
+            background-color: var(--vert-sn);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .flag-bar {
+            height: 6px;
+            display: flex;
+        }
+        .flag-vert { background-color: var(--vert-sn); flex: 1; }
+        .flag-jaune { background-color: var(--jaune-sn); flex: 1; }
+        .flag-rouge { background-color: var(--rouge-sn); flex: 1; }
+        .btn {
+            background-color: var(--vert-sn);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 15px;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-red { background: #ffebee; color: #c62828; }
+        .card {
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="flag-bar">
+        <div class="flag-vert"></div>
+        <div class="flag-jaune"></div>
+        <div class="flag-rouge"></div>
+    </div>
+    
+    <header>
+        <h1>🇸🇳 SignaSN</h1>
+        <p>Plateforme Citoyenne de Signalement au Sénégal</p>
+    </header>
+
+    <div class="container">
+        <h2>Bienvenue sur l'application Web SignaSN !</h2>
+        <p><strong>Philosophie :</strong> "Documenter les faits plutôt qu'accuser". Transformer un problème individuel en un fait géolocalisé et validé par la communauté pour les médias et décideurs.</p>
+
+        <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+
+        <h3>🔴 Signalements récents en direct (Dakar)</h3>
+        
+        <div class="card">
+            <div style="display: flex; justify-content: space-between;">
+                <strong>Infrastructures & Nids-de-poule</strong>
+                <span class="status-badge status-red">🔴 Signalé</span>
+            </div>
+            <p style="margin: 8px 0; color: #666;">Canalisation détériorée et nid-de-poule profond près du rond-point.</p>
+            <small>📍 Guédiawaye, Dakar • 👥 <strong>42 citoyens confirment ("Moi aussi")</strong></small>
+        </div>
+
+        <div class="card">
+            <div style="display: flex; justify-content: space-between;">
+                <strong>Pannes d'eau / Sen'Eau</strong>
+                <span class="status-badge status-red">🔴 Signalé</span>
+            </div>
+            <p style="margin: 8px 0; color: #666;">Coupure d'eau courante depuis plus de 48 heures dans le secteur.</p>
+            <small>📍 Pikine, Dakar • 👥 <strong>128 citoyens confirment ("Moi aussi")</strong></small>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="https://github.com/makhatoure/SignaSN" target="_blank" class="btn">Voir le Code Source sur GitHub 🚀</a>
+        </div>
+    </div>
+</body>
+</html>
