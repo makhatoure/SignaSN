@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="/">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Plateforme Citoyenne de Signalement au Sénégal">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="SignaSN">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>SignaSN — Signalement Citoyen Sénégal</title>
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    body {
+      background-color: #00853F;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+    .loading {
+      text-align: center;
+    }
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid #FDEF42;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="loading">
+    <div class="spinner"></div>
+    <h2>🇸🇳 Chargement de SignaSN...</h2>
+    <p>Plateforme Citoyenne de Signalement</p>
+  </div>
+  
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
