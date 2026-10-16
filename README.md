@@ -1,11 +1,11 @@
-# 🇸🇳 SignaSN — Plateforme Citoyenne de Signalement
+# 🇸🇳 SignalsSN — Plateforme Citoyenne de Signalement
 
-**SignaSN** est une application mobile citoyenne conçue pour le Sénégal permettant à chaque habitant de documenter et géolocaliser les anomalies du quotidien (infrastructures dégradées, insalubrité, loyers abusifs, pannes d'eau/électricité, etc.).
+**SignalsSN** est une application web citoyenne conçue pour le Sénégal permettant à chaque habitant de documenter et géolocaliser les anomalies et faits objectifs du quotidien (infrastructures dégradées, pannes de services publics, hygiène/insalubrité, etc.).
 
 ---
 
-## 🌟 Philosophie : "La Preuve avant Tout"
-Plutôt que d'alimenter les plaintes informelles sur les réseaux sociaux, **SignaSN** transforme une difficulté individuelle en un **fait documenté, géolocalisé et validé par la communauté**, directement exploitable par les journalistes d'investigation et les décideurs.
+## 🌟 Philosophie : "Des faits, pas d'accusations"
+Plutôt que d'alimenter les plaintes informelles sur les réseaux sociaux, **SignalsSN** transforme une difficulté individuelle en un **fait documenté, géolocalisé et vérifié par la communauté**, directement exploitable par les journalistes d'investigation et les décideurs publics.
 
 ---
 

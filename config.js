@@ -1,5 +1,5 @@
 // ==============================================================================
-// Configuration Supabase & Application SignaSN
+// Configuration Supabase & Application SignalsSN
 // ==============================================================================
 
 const CONFIG = {
@@ -10,7 +10,7 @@ const CONFIG = {
     SUPABASE_ANON_KEY: "sb_publishable_kumufMO16KZ--ckMMNgACQ_jcAzxSbh",
 
     // Nom de l'application
-    APP_NAME: "SignaSN",
+    APP_NAME: "SignalsSN",
     
     // Switch de fonctionnalités V1
     FEATURES: {

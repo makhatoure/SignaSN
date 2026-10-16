@@ -1,5 +1,5 @@
 // ==============================================================================
-// SignaSN — Application Principale PWA (JavaScript Vanilla)
+// SignalsSN — Application Principale PWA (JavaScript Vanilla)
 // Logique mobile-first : compression photo, champs dynamiques, Leaflet, Supabase
 // ==============================================================================
 
@@ -260,7 +260,7 @@ async function renderReportsList() {
         const isResoluActive = userInteractions[`${report.id}_resolu`] ? "active-resolu" : "";
         
         const whatsappText = encodeURIComponent(
-            `🇸🇳 *SignaSN — Fait Citoyen Documenté*\n📍 Lieu : ${report.establishment_name || report.location_name}\n📌 Fait : ${report.fact_type}\nStatut : ${statusLabels[report.status] || 'Confirmé'}\n👉 Suivre : https://github.com/makhatoure/SignaSN`
+            `🇸🇳 *SignalsSN — Fait Citoyen Documenté*\n📍 Lieu : ${report.establishment_name || report.location_name}\n📌 Fait : ${report.fact_type}\nStatut : ${statusLabels[report.status] || 'Confirmé'}\n👉 Suivre : https://github.com/makhatoure/SignaSN`
         );
         
         return `
@@ -827,7 +827,7 @@ function initOrRefreshMap() {
         
         // Tuiles OpenStreetMap (100% gratuites et sans clé d'API)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap Sénégal | SignaSN',
+            attribution: '&copy; OpenStreetMap Sénégal | SignalsSN',
             maxZoom: 18
         }).addTo(mapInstance);
     } else {
