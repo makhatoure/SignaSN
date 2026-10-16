@@ -2,115 +2,318 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SignaSN — Plateforme Citoyenne de Signalement au Sénégal 🇸🇳</title>
-    <style>
-        :root {
-            --vert-sn: #00853F;
-            --jaune-sn: #FDEF42;
-            --rouge-sn: #E31B23;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f6f8;
-            color: #333;
-        }
-        header {
-            background-color: var(--vert-sn);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .container {
-            max-width: 800px;
-            margin: 30px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        .flag-bar {
-            height: 6px;
-            display: flex;
-        }
-        .flag-vert { background-color: var(--vert-sn); flex: 1; }
-        .flag-jaune { background-color: var(--jaune-sn); flex: 1; }
-        .flag-rouge { background-color: var(--rouge-sn); flex: 1; }
-        .btn {
-            background-color: var(--vert-sn);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            text-decoration: none;
-            display: inline-block;
-            margin-top: 15px;
-        }
-        .btn:hover {
-            opacity: 0.9;
-        }
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .status-red { background: #ffebee; color: #c62828; }
-        .card {
-            border: 1px solid #eee;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SignaSN — Plateforme Citoyenne de Faits au Sénégal 🇸🇳</title>
+    
+    <!-- PWA Meta -->
+    <meta name="description" content="Plateforme citoyenne de signalement de faits vérifiables sur les services publics et la vie quotidienne au Sénégal.">
+    <meta name="theme-color" content="#00853F">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
+    <!-- Styles personnalisés -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="flag-bar">
-        <div class="flag-vert"></div>
-        <div class="flag-jaune"></div>
-        <div class="flag-rouge"></div>
+
+    <!-- Bandeau tricolore national -->
+    <div class="flag-banner">
+        <div class="green"></div>
+        <div class="yellow"></div>
+        <div class="red"></div>
     </div>
-    
-    <header>
-        <h1>🇸🇳 SignaSN</h1>
-        <p>Plateforme Citoyenne de Signalement au Sénégal</p>
+
+    <!-- En-tête principal -->
+    <header class="app-header">
+        <div class="brand">
+            <div class="brand-badge">🇸🇳</div>
+            <div class="brand-text">
+                <h1>SignaSN</h1>
+                <span>Faits Citoyens Vérifiés</span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn-header" id="btn-info-modal" title="Principes de la plateforme">
+                ℹ️ Charte
+            </button>
+        </div>
     </header>
 
-    <div class="container">
-        <h2>Bienvenue sur l'application Web SignaSN !</h2>
-        <p><strong>Philosophie :</strong> "Documenter les faits plutôt qu'accuser". Transformer un problème individuel en un fait géolocalisé et validé par la communauté pour les médias et décideurs.</p>
+    <main class="app-container">
 
-        <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
-
-        <h3>🔴 Signalements récents en direct (Dakar)</h3>
-        
-        <div class="card">
-            <div style="display: flex; justify-content: space-between;">
-                <strong>Infrastructures & Nids-de-poule</strong>
-                <span class="status-badge status-red">🔴 Signalé</span>
+        <!-- ====================================================================
+             VUE 1 : FIL PUBLIC DES SIGNALEMENTS
+             ==================================================================== -->
+        <section id="view-feed" class="view-section active">
+            <!-- Rappel déontologique factuel -->
+            <div class="principle-box">
+                <strong>⚖️ Principe Fondamental : Des faits, pas d'accusations</strong>
+                Ici, on documente les dysfonctionnements de lieux et d'infrastructures. Les noms de personnes physiques, insultes et règlements de comptes sont strictement interdits et bloqués.
             </div>
-            <p style="margin: 8px 0; color: #666;">Canalisation détériorée et nid-de-poule profond près du rond-point.</p>
-            <small>📍 Guédiawaye, Dakar • 👥 <strong>42 citoyens confirment ("Moi aussi")</strong></small>
-        </div>
 
-        <div class="card">
-            <div style="display: flex; justify-content: space-between;">
-                <strong>Pannes d'eau / Sen'Eau</strong>
-                <span class="status-badge status-red">🔴 Signalé</span>
+            <!-- Filtres par catégorie -->
+            <div class="category-filter-scroll">
+                <button class="filter-chip active" data-category="all">🌐 Tous les faits</button>
+                <button class="filter-chip" data-category="insalubrite">🗑️ Insalubrité & Voirie</button>
+                <button class="filter-chip" data-category="sante">🏥 Santé & Hôpitaux</button>
+                <button class="filter-chip" data-category="mairies_services">🏛️ Mairies & Services</button>
+                <button class="filter-chip" data-category="securite">🛡️ Sécurité (Zones)</button>
             </div>
-            <p style="margin: 8px 0; color: #666;">Coupure d'eau courante depuis plus de 48 heures dans le secteur.</p>
-            <small>📍 Pikine, Dakar • 👥 <strong>128 citoyens confirment ("Moi aussi")</strong></small>
-        </div>
 
-        <div style="text-align: center; margin-top: 30px;">
-            <a href="https://github.com/makhatoure/SignaSN" target="_blank" class="btn">Voir le Code Source sur GitHub 🚀</a>
+            <!-- Liste dynamique des cartes de signalement -->
+            <div id="reports-list">
+                <!-- Rempli par app.js -->
+                <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                    Chargement des signalements factuels...
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================================================
+             VUE 2 : FORMULAIRE DYNAMIQUE DE SIGNALEMENT
+             ==================================================================== -->
+        <section id="view-new" class="view-section">
+            <div class="form-card">
+                <h2 style="font-size: 1.25rem; margin-bottom: 6px;">Signaler un fait vérifiable</h2>
+                <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 20px;">
+                    Votre signalement restera anonyme. Seuls le lieu et le problème objectif seront traités.
+                </p>
+
+                <form id="report-form">
+                    <!-- 1. Catégorie -->
+                    <div class="form-group">
+                        <label class="form-label" for="category-select">Catégorie <span class="required">*</span></label>
+                        <select id="category-select" class="form-select" required>
+                            <option value="">Sélectionnez une catégorie...</option>
+                            <option value="insalubrite">🗑️ Insalubrité & Bâtiments dangereux (Public immédiatement)</option>
+                            <option value="sante">🏥 Santé & Hôpitaux (Public après 3 signalements concordants)</option>
+                            <option value="mairies_services">🏛️ Mairies & Services Publics (Public après recoupement)</option>
+                            <option value="securite">🛡️ Sécurité (Affiché en zone de vigilance sur carte)</option>
+                        </select>
+                    </div>
+
+                    <!-- 2. Zone dynamique selon la catégorie sélectionnée -->
+                    <div id="dynamic-category-fields">
+                        <!-- Rempli dynamiquement par JS selon la catégorie -->
+                    </div>
+
+                    <!-- 3. Localisation -->
+                    <div class="form-group">
+                        <label class="form-label" for="location-input">Lieu précis ou repère <span class="required">*</span></label>
+                        <input type="text" id="location-input" class="form-control" placeholder="Ex: Croisement 22 Parcelles, Entrée Urgences Fann..." required maxlength="100">
+                        <div style="display: flex; gap: 8px; margin-top: 6px;">
+                            <button type="button" id="btn-gps" class="btn-action" style="font-size: 0.78rem;">
+                                📍 Utiliser ma position GPS
+                            </button>
+                            <span id="gps-status" style="font-size: 0.75rem; color: var(--text-muted); align-self: center;"></span>
+                        </div>
+                        <input type="hidden" id="lat-input">
+                        <input type="hidden" id="lng-input">
+                    </div>
+
+                    <!-- 4. Date & Heure du fait -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;" class="form-group">
+                        <div>
+                            <label class="form-label" for="incident-date">Date du fait <span class="required">*</span></label>
+                            <input type="date" id="incident-date" class="form-control" required>
+                        </div>
+                        <div>
+                            <label class="form-label" for="incident-time">Heure constatée</label>
+                            <input type="time" id="incident-time" class="form-control">
+                        </div>
+                    </div>
+
+                    <!-- 5. Description factuelle (Strictement aucun nom propre) -->
+                    <div class="form-group">
+                        <label class="form-label" for="description-input">
+                            Description purement factuelle <span class="required">*</span>
+                        </label>
+                        <textarea id="description-input" class="form-textarea" rows="3" maxlength="500" placeholder="Décrivez uniquement l'état matériel, les horaires ou le problème constaté. AUCUN NOM d'agent ni accusation personnelle." required></textarea>
+                        <div class="char-counter"><span id="char-count">0</span> / 500</div>
+                        <div id="filter-warning" style="display: none; background: #fff1f2; color: #be123c; padding: 8px; border-radius: 6px; font-size: 0.78rem; margin-top: 6px;">
+                            ⚠️ Votre texte semble contenir un nom propre ou un terme sensible. Merci de décrire uniquement l'infrastructure ou le service sans viser de personne.
+                        </div>
+                    </div>
+
+                    <!-- 6. Preuve Photo (Obligatoire pour insalubrité) -->
+                    <div class="form-group" id="photo-group">
+                        <label class="form-label" id="photo-label">
+                            Photo du lieu / de l'anomalie
+                        </label>
+                        <input type="file" id="photo-input" accept="image/*" class="form-control" style="font-size: 0.85rem;">
+                        <p class="form-help">
+                            🔒 <strong>Important :</strong> Photographiez uniquement l'anomalie matérielle (fissure, déchets, panneau). Aucun visage ni plaque d'immatriculation.
+                        </p>
+                        <div id="photo-preview-container" style="display: none; margin-top: 10px;">
+                            <img id="photo-preview" src="" alt="Aperçu compressé" style="max-height: 180px; border-radius: 8px; border: 1px solid var(--border-color);">
+                            <div id="photo-compression-info" style="font-size: 0.72rem; color: var(--vert-sn); font-weight: 600; margin-top: 4px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 7. Rôle du déclarant -->
+                    <div class="form-group">
+                        <label class="form-label">Votre rôle <span class="required">*</span></label>
+                        <div style="display: flex; gap: 10px;">
+                            <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 4px;">
+                                <input type="radio" name="reporter_role" value="present" checked> Présent sur place
+                            </label>
+                            <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 4px;">
+                                <input type="radio" name="reporter_role" value="victime"> Usager directement impacté
+                            </label>
+                            <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 4px;">
+                                <input type="radio" name="reporter_role" value="rapporte"> Constaté / Rapporté
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Bouton Soumettre -->
+                    <button type="submit" id="btn-submit-report" class="btn-submit">
+                        Transmettre ce fait citoyen 🚀
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ====================================================================
+             VUE 3 : CARTE INTERACTIVE LEAFLET / OSM
+             ==================================================================== -->
+        <section id="view-map" class="view-section">
+            <h2 style="font-size: 1.15rem; margin-bottom: 8px;">Carte Publique des Faits Constatés</h2>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 14px;">
+                Visualisez la répartition géographique des incidents confirmés et des zones de vigilance au Sénégal.
+            </p>
+            <div id="map-container"></div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.75rem; color: var(--text-secondary); margin-top: 6px;">
+                <span>🔴 Insalubrité / Bâtiment</span>
+                <span>🔵 Santé publique</span>
+                <span>🟡 Mairie & Services</span>
+                <span>🟣 Zone de vigilance</span>
+            </div>
+        </section>
+
+        <!-- ====================================================================
+             VUE 4 : STATISTIQUES PUBLIQUES PAR ÉTABLISSEMENT
+             ==================================================================== -->
+        <section id="view-stats" class="view-section">
+            <h2 style="font-size: 1.15rem; margin-bottom: 8px;">Statistiques Publiques par Établissement</h2>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 16px;">
+                Données consolidées objectives sur la qualité de service et la réactivité des structures publiques.
+            </p>
+
+            <div class="stat-card-grid">
+                <div class="stat-metric-card">
+                    <div class="stat-metric-value" id="stat-total-reports">0</div>
+                    <div class="stat-metric-label">Faits documentés</div>
+                </div>
+                <div class="stat-metric-card">
+                    <div class="stat-metric-value" id="stat-resolved-rate">0%</div>
+                    <div class="stat-metric-label">Problèmes résolus</div>
+                </div>
+            </div>
+
+            <!-- Liste des établissements avec métriques -->
+            <div id="establishments-stats-list">
+                <!-- Rempli par app.js -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ====================================================================
+         BARRE DE NAVIGATION BASSE (MOBILE FIRST)
+         ==================================================================== -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" data-target="view-feed">
+            <span class="nav-icon">📋</span>
+            <span>Fil Public</span>
+        </button>
+        <button class="nav-item" data-target="view-new">
+            <span class="nav-icon">➕</span>
+            <span>Signaler</span>
+        </button>
+        <button class="nav-item" data-target="view-map">
+            <span class="nav-icon">🗺️</span>
+            <span>Carte</span>
+        </button>
+        <button class="nav-item" data-target="view-stats">
+            <span class="nav-icon">📊</span>
+            <span>Statistiques</span>
+        </button>
+    </nav>
+
+    <!-- ====================================================================
+         MODALES
+         ==================================================================== -->
+
+    <!-- Modal 1 : Signaler un contenu abusif (Retrait sous 24-48h) -->
+    <div id="modal-flag" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🚩 Demande de modération / retrait</h3>
+                <button type="button" class="btn-close-modal" id="btn-close-flag">&times;</button>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 14px;">
+                Tout contenu contenant des noms de personnes, des visages, des insultes ou des faits infondés est retiré sous 24 à 48 heures.
+            </p>
+            <form id="flag-form">
+                <input type="hidden" id="flag-report-id">
+                <div class="form-group">
+                    <label class="form-label" for="flag-reason">Motif de la demande <span class="required">*</span></label>
+                    <select id="flag-reason" class="form-select" required>
+                        <option value="">Choisissez le motif...</option>
+                        <option value="nom_de_personne">Mention de nom ou prénom d'un individu</option>
+                        <option value="visage_visible">Visage ou plaque d'immatriculation visible</option>
+                        <option value="diffamation_accusation">Accusation sans fait matériel vérifiable</option>
+                        <option value="faux_fait">Fait inexact ou déjà réparé</option>
+                        <option value="autre">Autre motif légitime</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="flag-details">Précisions utiles</label>
+                    <textarea id="flag-details" class="form-textarea" rows="2" placeholder="Expliquez brièvement..."></textarea>
+                </div>
+                <button type="submit" class="btn-submit" style="background: var(--rouge-sn);">
+                    Envoyer le signalement à l'équipe
+                </button>
+            </form>
         </div>
     </div>
+
+    <!-- Modal 2 : Charte & Principes factuels -->
+    <div id="modal-info" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🇸🇳 Charte Citoyenne SignaSN</h3>
+                <button type="button" class="btn-close-modal" id="btn-close-info">&times;</button>
+            </div>
+            <div style="font-size: 0.85rem; color: #334155; line-height: 1.6;">
+                <p><strong>1. Signaler des faits, jamais des personnes :</strong><br>
+                Nous documentons l'état des services publics (délais, pannes, absences d'équipement) et les anomalies physiques (fissures, ordures). Les noms propres sont interdits.</p>
+                <br>
+                <p><strong>2. Règle de recoupement Santé & Mairies :</strong><br>
+                Pour éviter toute manipulation, les signalements hospitaliers ne deviennent publics qu'après <strong>3 signalements concordants</strong>.</p>
+                <br>
+                <p><strong>3. Respect de la vie privée :</strong><br>
+                Aucune donnée personnelle n'est exigée des citoyens pour témoigner.</p>
+                <br>
+                <p><strong>4. Droit de réponse :</strong><br>
+                Tout établissement concerné dispose d'un espace pour publier son droit de réponse ou annoncer la prise en charge des travaux.</p>
+            </div>
+            <button type="button" class="btn-submit" id="btn-close-info-ok" style="margin-top: 16px;">
+                J'ai compris et j'adhère
+            </button>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Supabase JS Client (v2) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Scripts applicatifs -->
+    <script src="config.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
