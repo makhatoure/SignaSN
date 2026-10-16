@@ -137,9 +137,37 @@ navButtons.forEach(btn => {
             setTimeout(initOrRefreshMap, 200);
         } else if (targetId === "view-stats") {
             loadEstablishmentStats();
+        } else if (targetId === "view-new") {
+            syncCurrentDateTime();
         }
     });
 });
+
+// Synchronisation automatique de la date et heure du téléphone
+function syncCurrentDateTime() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    
+    const dateInput = document.getElementById("incident-date");
+    const timeInput = document.getElementById("incident-time");
+    
+    if (dateInput) dateInput.value = `${y}-${m}-${d}`;
+    if (timeInput) timeInput.value = `${hh}:${mm}`;
+}
+
+// Navigation directe depuis l'Empty State
+window.goToReportWithCategory = function(cat) {
+    const newBtn = document.querySelector('.nav-item[data-target="view-new"]');
+    if (newBtn) newBtn.click();
+    if (cat && cat !== "all") {
+        categorySelect.value = cat;
+        renderDynamicFields(cat);
+    }
+};
 
 // --- 3. GESTION DU FILTRAGE DU FIL PUBLIC ---
 const filterChips = document.querySelectorAll(".filter-chip");
@@ -186,11 +214,23 @@ async function renderReportsList() {
         : reports.filter(r => r.category === currentCategoryFilter);
     
     if (filtered.length === 0) {
+        const catNames = {
+            insalubrite: "Insalubrité & Voirie",
+            sante: "Santé & Hôpitaux",
+            mairies_services: "Mairies & Services",
+            securite: "Sécurité"
+        };
+        const catTitle = catNames[currentCategoryFilter] || "cette catégorie";
         listContainer.innerHTML = `
-            <div style="text-align: center; padding: 40px; background: white; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-                <span style="font-size: 2rem;">🕊️</span>
-                <p style="font-weight: 700; margin-top: 8px;">Aucun fait signalé dans cette catégorie</p>
-                <p style="font-size: 0.8rem; color: var(--text-muted);">Soyez le premier à documenter un fait factuel.</p>
+            <div style="text-align: center; padding: 40px 20px; background: white; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <span style="font-size: 2.2rem;">🕊️</span>
+                <p style="font-weight: 700; margin-top: 10px; font-size: 1.05rem; color: var(--text-primary);">Aucun fait signalé dans ${escapeHtml(catTitle)}</p>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 16px;">
+                    Soyez le premier citoyen à documenter un fait factuel vérifiable.
+                </p>
+                <button type="button" class="btn-submit" onclick="goToReportWithCategory('${currentCategoryFilter}')" style="max-width: 280px; margin: 0 auto; padding: 10px 16px; font-size: 0.88rem;">
+                    ➕ Signaler un fait ${currentCategoryFilter !== 'all' ? 'ici' : ''}
+                </button>
             </div>
         `;
         return;
@@ -346,9 +386,36 @@ categorySelect.addEventListener("change", (e) => {
 });
 
 function renderDynamicFields(category) {
+    const locationLabel = document.getElementById("location-label");
+    const locationInput = document.getElementById("location-input");
+    const gpsContainer = document.getElementById("gps-button-container");
+
     if (!category) {
         dynamicContainer.innerHTML = "";
+        if (locationLabel) locationLabel.innerHTML = `Lieu précis ou repère <span class="required">*</span>`;
+        if (locationInput) {
+            locationInput.placeholder = "Ex: Croisement 22 Parcelles, Entrée Urgences Fann...";
+            locationInput.required = true;
+        }
+        if (gpsContainer) gpsContainer.style.display = "flex";
         return;
+    }
+    
+    // Adaptation du champ de lieu selon la catégorie
+    if (category === "sante" || category === "mairies_services") {
+        if (locationLabel) locationLabel.innerHTML = `Précision d'accès dans l'établissement <span style="font-weight: normal; color: var(--text-muted); font-size: 0.78rem;">(Bâtiment, service, étage, couloir... Optionnel)</span>`;
+        if (locationInput) {
+            locationInput.placeholder = "Ex: Bâtiment Pédiatrie, 1er étage, Guichet 2...";
+            locationInput.required = false;
+        }
+        if (gpsContainer) gpsContainer.style.display = "none";
+    } else {
+        if (locationLabel) locationLabel.innerHTML = `Lieu précis, rue ou repère <span class="required">*</span>`;
+        if (locationInput) {
+            locationInput.placeholder = "Ex: Croisement 22 Parcelles, Rond-point Case Bi, près de la station...";
+            locationInput.required = true;
+        }
+        if (gpsContainer) gpsContainer.style.display = "flex";
     }
     
     // Insalubrité : photo obligatoire, types physiques
@@ -675,16 +742,19 @@ reportForm.addEventListener("submit", async (e) => {
     const peopleInput = document.getElementById("people-count-input");
     const peopleCount = peopleInput ? parseInt(peopleInput.value, 10) : null;
     
-    const momentSelect = document.getElementById("moment-select");
-    const momentOfDay = momentSelect ? momentSelect.value : null;
-    
+    // Si un établissement est sélectionné, il constitue le repère principal
+    let finalLocationName = locationName;
+    if (establishmentName) {
+        finalLocationName = locationName ? `${establishmentName} (${locationName})` : establishmentName;
+    }
+
     const newReport = {
         category,
         status: (category === "insalubrite" || category === "securite") ? "confirme" : "recu",
         establishment_id: establishmentId,
         establishment_name: establishmentName,
         service_name: serviceName,
-        location_name: locationName,
+        location_name: finalLocationName,
         latitude: lat || 14.6937,
         longitude: lng || -17.4441,
         incident_date: incidentDate,
@@ -735,7 +805,8 @@ reportForm.addEventListener("submit", async (e) => {
     reportForm.reset();
     compressedPhotoData = null;
     document.getElementById("photo-preview-container").style.display = "none";
-    dynamicContainer.innerHTML = "";
+    renderDynamicFields(null);
+    syncCurrentDateTime();
     submitBtn.disabled = false;
     submitBtn.textContent = "Transmettre ce fait citoyen 🚀";
     
@@ -743,7 +814,9 @@ reportForm.addEventListener("submit", async (e) => {
     document.querySelector('.nav-item[data-target="view-feed"]').click();
 });
 
-// --- 11. CARTE INTERACTIVE LEAFLET / OPENSTREETMAP ---
+// --- 11. CARTE INTERACTIVE LEAFLET / OPENSTREETMAP AVEC CLUSTERING ---
+let markerClusterGroup = null;
+
 function initOrRefreshMap() {
     const mapContainer = document.getElementById("map-container");
     if (!mapContainer) return;
@@ -761,9 +834,23 @@ function initOrRefreshMap() {
         mapInstance.invalidateSize();
     }
     
-    // Nettoyer les anciens marqueurs
+    // Nettoyer les anciens clusters ou marqueurs
+    if (markerClusterGroup) {
+        mapInstance.removeLayer(markerClusterGroup);
+        markerClusterGroup = null;
+    }
     mapMarkers.forEach(m => mapInstance.removeLayer(m));
     mapMarkers = [];
+    
+    const hasClusterPlugin = typeof L.markerClusterGroup === 'function';
+    if (hasClusterPlugin) {
+        markerClusterGroup = L.markerClusterGroup({
+            maxClusterRadius: 45,
+            spiderfyOnMaxZoom: true,
+            showCoverageOnHover: false,
+            zoomToBoundsOnClick: true
+        });
+    }
     
     // Récupérer les signalements visibles avec coordonnées
     fetchReports().then(reports => {
@@ -778,13 +865,13 @@ function initOrRefreshMap() {
                 const color = colors[r.category] || "#00853F";
                 
                 const circleMarker = L.circleMarker([r.latitude, r.longitude], {
-                    radius: 8,
+                    radius: 9,
                     fillColor: color,
                     color: "#ffffff",
                     weight: 2,
                     opacity: 1,
-                    fillOpacity: 0.85
-                }).addTo(mapInstance);
+                    fillOpacity: 0.9
+                });
                 
                 const popupContent = `
                     <div style="font-size: 0.85rem; font-family: sans-serif;">
@@ -795,9 +882,19 @@ function initOrRefreshMap() {
                     </div>
                 `;
                 circleMarker.bindPopup(popupContent);
-                mapMarkers.push(circleMarker);
+                
+                if (hasClusterPlugin && markerClusterGroup) {
+                    markerClusterGroup.addLayer(circleMarker);
+                } else {
+                    circleMarker.addTo(mapInstance);
+                    mapMarkers.push(circleMarker);
+                }
             }
         });
+        
+        if (hasClusterPlugin && markerClusterGroup) {
+            mapInstance.addLayer(markerClusterGroup);
+        }
     });
 }
 
@@ -902,5 +999,6 @@ window.addEventListener("click", (e) => {
 
 // Chargement initial
 document.addEventListener("DOMContentLoaded", () => {
+    syncCurrentDateTime();
     renderReportsList();
 });

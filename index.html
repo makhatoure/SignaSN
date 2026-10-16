@@ -9,8 +9,10 @@
     <meta name="description" content="Plateforme citoyenne de signalement de faits vérifiables sur les services publics et la vie quotidienne au Sénégal.">
     <meta name="theme-color" content="#00853F">
     
-    <!-- Leaflet CSS -->
+    <!-- Leaflet CSS & MarkerCluster -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
     
     <!-- Styles personnalisés -->
     <link rel="stylesheet" href="styles.css">
@@ -99,10 +101,10 @@
                     </div>
 
                     <!-- 3. Localisation -->
-                    <div class="form-group">
-                        <label class="form-label" for="location-input">Lieu précis ou repère <span class="required">*</span></label>
+                    <div class="form-group" id="location-group">
+                        <label class="form-label" for="location-input" id="location-label">Lieu précis ou repère <span class="required">*</span></label>
                         <input type="text" id="location-input" class="form-control" placeholder="Ex: Croisement 22 Parcelles, Entrée Urgences Fann..." required maxlength="100">
-                        <div style="display: flex; gap: 8px; margin-top: 6px;">
+                        <div id="gps-button-container" style="display: flex; gap: 8px; margin-top: 6px;">
                             <button type="button" id="btn-gps" class="btn-action" style="font-size: 0.78rem;">
                                 📍 Utiliser ma position GPS
                             </button>
@@ -306,8 +308,9 @@
         </div>
     </div>
 
-    <!-- Leaflet JS -->
+    <!-- Leaflet JS & MarkerCluster -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
     
     <!-- Supabase JS Client (v2) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
