@@ -675,17 +675,90 @@ body {
 }
 
 /* ==============================================================================
-   ALIGNEMENT STRICT SUR 2 LIGNES PAR CARTE
-   Ligne 1 : Statut à gauche, "Moi aussi j'ai vu" à droite
-   Ligne 2 : Danger immédiat à gauche, "Partager sur WhatsApp" à droite
-   Boutons : Même largeur, min-height 44px
+   CARTES DE SIGNALEMENT — DESIGN MAQUETTE EXACTE
+   - Bordure latérale colorée (Voirie marron/orange, Eau bleue, etc.)
+   - Icône ronde de catégorie
+   - Barre de progression verte de confirmation
    ============================================================================== */
+.report-card {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.card-header-flex {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.card-cat-badge {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+}
+
+.card-title-block {
+    flex: 1;
+    min-width: 0;
+}
+
+.report-card-title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--primary-green-dark);
+    line-height: 1.3;
+}
+
+.report-card-subtitle-compact {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* Barre de progression de confirmation */
+.card-progress-section {
+    margin-bottom: 12px;
+}
+
+.card-progress-label {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 4px;
+}
+
+.card-progress-track {
+    width: 100%;
+    height: 4px;
+    background-color: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.card-progress-bar {
+    height: 100%;
+    background-color: #0b6637;
+    border-radius: 999px;
+    transition: width 0.3s ease;
+}
+
+/* Grille 2 lignes */
 .card-dual-grid {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-top: 8px;
-    margin-bottom: 6px;
+    gap: 8px;
+    margin-top: 4px;
+    margin-bottom: 4px;
 }
 
 .dual-row {
@@ -693,14 +766,12 @@ body {
     justify-content: space-between;
     align-items: center;
     gap: 12px;
-    min-height: 44px;
 }
 
 .dual-col-left {
     flex: 1;
     display: flex;
     align-items: center;
-    min-width: 0;
 }
 
 .dual-col-right {
@@ -709,17 +780,17 @@ body {
     justify-content: flex-end;
 }
 
-/* Boutons d'action unifiés : même taille et min-height 44px tactile */
+/* Boutons d'action */
 .card-action-btn {
-    width: 175px;
-    min-height: 44px;
-    height: 44px;
+    width: 170px;
+    min-height: 42px;
+    height: 42px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     text-align: center;
     box-sizing: border-box;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 600;
     border-radius: var(--radius-sm);
     text-decoration: none;
@@ -729,43 +800,157 @@ body {
 
 .btn-moi-aussi {
     background: white;
-    border: 1.5px solid var(--primary-green);
-    color: var(--primary-green);
+    border: 1.5px solid #0b6637;
+    color: #0b6637;
 }
 .btn-moi-aussi:hover {
     background: var(--primary-green-light);
 }
 .btn-moi-aussi.active {
-    background: var(--primary-green);
+    background: #0b6637;
     color: white;
 }
 
-.btn-whatsapp {
-    background: #25d366;
+/* Bouton WhatsApp : Rempli vert (filled) ou contour blanc (outlined) */
+.btn-whatsapp.filled {
+    background: #15803d;
     color: white;
-    border: 1.5px solid #20ba5a;
+    border: 1.5px solid #15803d;
 }
-.btn-whatsapp:hover {
-    background: #1eb757;
+.btn-whatsapp.filled:hover {
+    background: #166534;
+}
+.btn-whatsapp.outlined {
+    background: white;
+    color: #374151;
+    border: 1.5px solid #d1d5db;
+}
+.btn-whatsapp.outlined:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
 }
 
-/* Bloc Danger immédiat + conseil secours */
-.danger-immediate-block {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
-.danger-call-notice {
-    font-size: 0.72rem;
+/* Notice d'alerte secours centrée au dessus du bouton */
+.danger-call-center-notice {
+    font-size: 0.74rem;
     color: #b91c1c;
     font-weight: 500;
-    line-height: 1.25;
+    text-align: right;
+    margin: 2px 0;
+    padding-right: 4px;
+}
+
+/* Pastilles de statut */
+.pill-status {
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 0.74rem;
+    font-weight: 600;
+    display: inline-block;
+}
+.pill-confirme {
+    background: #dcfce7;
+    color: #166534;
+}
+.pill-non-confirmed {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+    border: 1px solid #fde68a !important;
+}
+.pill-danger {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+    font-weight: 600;
+}
+
+/* ==============================================================================
+   PIED DE PAGE : ENCADRÉ URGENCE IMMÉDIATE (MAQUETTE EXACTE)
+   ============================================================================== */
+.urgency-footer {
+    background: #fff5f5;
+    border: 1.5px solid #fed7d7;
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    margin-top: 18px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.urgency-footer-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #c53030;
+    margin-bottom: 10px;
+}
+
+.urgency-footer-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+.urgency-footer-row.center {
+    margin-bottom: 0;
+}
+
+.urgency-pill.mini {
+    background: white;
+    color: #4a5568;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    transition: all 0.15s ease;
+}
+.urgency-pill.mini:hover {
+    border-color: #cbd5e0;
+    background: #f7fafc;
+}
+
+/* ==============================================================================
+   BOUTON FLOTTANT CENTRAL + SIGNALER (FAB NAVBAR)
+   ============================================================================== */
+.bottom-nav-item.nav-btn-center {
+    position: relative;
+    top: -12px;
+}
+
+.nav-fab-icon {
+    width: 48px;
+    height: 48px;
+    background: #0b6637;
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: 300;
+    line-height: 1;
+    box-shadow: 0 4px 10px rgba(11, 102, 55, 0.35);
+    border: 3px solid white;
+    transition: transform 0.15s ease;
+}
+
+.bottom-nav-item.nav-btn-center:active .nav-fab-icon {
+    transform: scale(0.94);
+}
+
+.bottom-nav-item.nav-btn-center span {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #0b6637;
+    margin-top: 2px;
 }
 
 @media (max-width: 440px) {
     .card-action-btn {
-        width: 155px;
-        font-size: 0.75rem;
+        width: 145px;
+        font-size: 0.74rem;
     }
 }
 

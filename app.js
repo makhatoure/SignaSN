@@ -337,62 +337,84 @@ async function renderReportsList() {
         );
         const whatsappBtn = `<a href="https://wa.me/?text=${whatsappText}" target="_blank" rel="noopener" class="btn-whatsapp">Partager sur WhatsApp</a>`;
 
-        // Label statut court et explicite
-        let displayStatusLabel = "Confirmé";
-        if (report.status === "recu" || report.status === "publie") {
-            const count = report.moi_aussi_count || 1;
-            const currentStep = Math.min(count, 1);
-            displayStatusLabel = `Non confirmé · ${currentStep} sur ${MOI_AUSSI_THRESHOLD}`;
-        } else if (report.status === "transmis") {
-            displayStatusLabel = "Transmis";
-        } else if (report.status === "resolu") {
-            displayStatusLabel = "Résolu";
-        } else if (report.status === "sans_suite") {
-            displayStatusLabel = "Sans suite";
-        }
+        // Catégories infos
+        const catInfo = {
+            voirie: { name: "Voirie", icon: "🚧", color: "#c2410c" },
+            eau_electricite: { name: "Eau", icon: "💧", color: "#0284c7" },
+            insalubrite: { name: "Insalubrité", icon: "🧹", color: "#dc2626" },
+            sante: { name: "Santé", icon: "🏥", color: "#059669" },
+            mairies_services: { name: "Mairie", icon: "🏛️", color: "#d97706" },
+            securite: { name: "Sécurité", icon: "🛡️", color: "#7c3aed" }
+        };
+        const currentCat = catInfo[report.category] || { name: "Signalement", icon: "📍", color: "#0b6637" };
+
+        // Calcul confirmation et barre de progression
+        const count = report.moi_aussi_count || 1;
+        const isConfirmed = report.status === "confirme" || report.status === "transmis" || report.status === "resolu" || count >= MOI_AUSSI_THRESHOLD;
+        
+        const progressPercent = isConfirmed ? 100 : Math.round((Math.min(count, 1) / MOI_AUSSI_THRESHOLD) * 100);
+        const progressLabel = isConfirmed 
+            ? `Confirmé par ${count} personnes`
+            : `${Math.min(count, 1)} sur ${MOI_AUSSI_THRESHOLD} pour confirmer`;
 
         return `
-            <div class="report-card" id="card-${report.id}">
-                <div class="report-card-title">
-                    ${escapeHtml(report.establishment_name || report.location_name)}
+            <div class="report-card cat-card-${report.category}" id="card-${report.id}" style="border-left: 4px solid ${currentCat.color};">
+                
+                <!-- En-tête avec rond icône et titre -->
+                <div class="card-header-flex">
+                    <div class="card-cat-badge" style="background: ${currentCat.color}18; color: ${currentCat.color};">
+                        <span>${currentCat.icon}</span>
+                    </div>
+                    <div class="card-title-block">
+                        <div class="report-card-title">
+                            [${escapeHtml(report.establishment_name || report.location_name)}]
+                        </div>
+                        <div class="report-card-subtitle-compact">
+                            ${currentCat.name} · ${escapeHtml(report.fact_type)} · [${formattedDate}] · [${timeDisplay}]
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Jauge de progression de confirmation -->
+                <div class="card-progress-section">
+                    <div class="card-progress-label">${progressLabel}</div>
+                    <div class="card-progress-track">
+                        <div class="card-progress-bar" style="width: ${progressPercent}%;"></div>
+                    </div>
                 </div>
                 
-                <div class="report-card-subtitle">
-                    ${catIconLabel} · ${escapeHtml(report.fact_type)}
-                </div>
-                
-                <div class="report-card-time">
-                    ${formattedDate} · ${timeDisplay}
-                </div>
-                
-                <!-- Alignement 2 Lignes -->
+                <!-- Alignement 2 Lignes de boutons & pastilles -->
                 <div class="card-dual-grid">
                     <!-- Ligne 1 : Statut à gauche | Bouton Moi aussi à droite -->
                     <div class="dual-row dual-row-1">
                         <div class="dual-col-left">
-                            <span class="pill-status pill-${report.status} ${isNonConfirmed ? 'pill-non-confirmed' : ''}">
-                                ${displayStatusLabel}
+                            <span class="pill-status ${isConfirmed ? 'pill-confirme' : 'pill-non-confirmed'}">
+                                ${isConfirmed ? 'Confirmé' : 'Non confirmé'}
                             </span>
                         </div>
                         <div class="dual-col-right">
                             <button class="card-action-btn btn-moi-aussi ${isMoiAussiActive}" onclick="handleMoiAussi('${report.id}')">
-                                Moi aussi j'ai vu
+                                👁 Moi aussi j'ai vu
                             </button>
                         </div>
                     </div>
+
+                    <!-- Conseil secours au-dessus du bouton ligne 2 en cas de danger -->
+                    ${report.immediate_danger ? `
+                        <div class="danger-call-center-notice">
+                            Appelez d'abord les secours si vous êtes sur place.
+                        </div>
+                    ` : ''}
                     
-                    <!-- Ligne 2 : Danger immédiat (+ conseil secours) à gauche | Bouton WhatsApp à droite -->
+                    <!-- Ligne 2 : Danger immédiat à gauche | Bouton WhatsApp à droite -->
                     <div class="dual-row dual-row-2">
                         <div class="dual-col-left">
                             ${report.immediate_danger ? `
-                                <div class="danger-immediate-block">
-                                    <span class="pill-status pill-danger">Danger immédiat</span>
-                                    <span class="danger-call-notice">Appelez d'abord les secours si vous êtes sur place</span>
-                                </div>
+                                <span class="pill-status pill-danger">Danger immédiat</span>
                             ` : ''}
                         </div>
                         <div class="dual-col-right">
-                            <a href="https://wa.me/?text=${whatsappText}" target="_blank" rel="noopener" class="card-action-btn btn-whatsapp">
+                            <a href="https://wa.me/?text=${whatsappText}" target="_blank" rel="noopener" class="card-action-btn btn-whatsapp ${report.immediate_danger ? 'filled' : 'outlined'}">
                                 Partager sur WhatsApp
                             </a>
                         </div>
