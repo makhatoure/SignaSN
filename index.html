@@ -3,242 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SignalsSN — Plateforme Citoyenne de Faits au Sénégal 🇸🇳</title>
+    <title>SignalSN — Faits citoyens documentés 🇸🇳</title>
     
     <!-- PWA Meta -->
     <meta name="description" content="Plateforme citoyenne de signalement de faits vérifiables sur les services publics et la vie quotidienne au Sénégal.">
-    <meta name="theme-color" content="#00853F">
+    <meta name="theme-color" content="#0b6637">
     
     <!-- Leaflet CSS & MarkerCluster -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
     
-    <!-- Styles personnalisés -->
+    <!-- Styles personnalisés maquette officielle -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <!-- Bandeau tricolore national -->
-    <div class="flag-banner">
+    <!-- En-tête vert institutionnel -->
+    <header class="app-header">
+        <div class="header-brand-wrap">
+            <div class="header-logo-badge">SN</div>
+            <div class="header-text-block">
+                <h1>SignalSN</h1>
+                <p>Faits citoyens documentés · Initiative citoyenne indépendante</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Bandeau tricolore sénégalais -->
+    <div class="header-flag-strip">
         <div class="green"></div>
         <div class="yellow"></div>
         <div class="red"></div>
     </div>
 
-    <!-- En-tête principal -->
-    <header class="app-header">
-        <div class="brand">
-            <div class="brand-badge">🇸🇳</div>
-            <div class="brand-text">
-                <h1>SignalsSN</h1>
-                <span>Faits Citoyens Vérifiés</span>
-            </div>
-        </div>
-        <div class="header-actions">
-            <button class="btn-header" id="btn-info-modal" title="Principes de la plateforme">
-                ℹ️ Charte
-            </button>
-        </div>
-    </header>
-
     <main class="app-container">
 
         <!-- ====================================================================
-             VUE 1 : FIL PUBLIC DES SIGNALEMENTS
+             ÉCRAN 1 : FIL PUBLIC
              ==================================================================== -->
         <section id="view-feed" class="view-section active">
-            <!-- Rappel déontologique factuel -->
-            <div class="principle-box">
-                <strong>⚖️ Principe Fondamental : Des faits, pas d'accusations</strong>
-                Ici, on documente les dysfonctionnements de lieux et d'infrastructures. Les noms de personnes physiques, insultes et règlements de comptes sont strictement interdits et bloqués.
+            <!-- Encadré déontologique -->
+            <div class="principle-banner">
+                <h3>Des faits, pas des accusations</h3>
+                <p>Nous documentons l'état des lieux et des services. Les noms de personnes, insultes et accusations ne sont pas publiés.</p>
             </div>
 
             <!-- Filtres par catégorie -->
-            <div class="category-filter-scroll">
-                <button class="filter-chip active" data-category="all">🌐 Tous les faits</button>
-                <button class="filter-chip" data-category="insalubrite">🗑️ Insalubrité & Voirie</button>
-                <button class="filter-chip" data-category="sante">🏥 Santé & Hôpitaux</button>
-                <button class="filter-chip" data-category="mairies_services">🏛️ Mairies & Services</button>
-                <button class="filter-chip" data-category="securite">🛡️ Sécurité (Zones)</button>
+            <div class="category-filter-row">
+                <button class="filter-btn active" data-category="all">Tous</button>
+                <button class="filter-btn" data-category="insalubrite">🧹 Insalubrité</button>
+                <button class="filter-btn" data-category="sante">🏥 Santé</button>
+                <button class="filter-btn" data-category="mairies_services">🏛️ Mairies</button>
             </div>
 
-            <!-- Liste dynamique des cartes de signalement -->
+            <p class="filter-help-text">Un fait est publié après recoupement de plusieurs signalements.</p>
+
+            <!-- Liste des signalements -->
             <div id="reports-list">
                 <!-- Rempli par app.js -->
-                <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
-                    Chargement des signalements factuels...
-                </div>
+            </div>
+
+            <!-- Liens footer -->
+            <div class="app-footer-links">
+                <a onclick="openInfoModal()">Charte</a>
+                <a onclick="openLegalModal('mentions')">Mentions légales</a>
+                <a onclick="openLegalModal('confidentialite')">Confidentialité</a>
+                <a onclick="openLegalModal('contact')">Contact</a>
             </div>
         </section>
 
         <!-- ====================================================================
-             VUE 2 : FORMULAIRE DYNAMIQUE DE SIGNALEMENT
+             ÉCRAN 2 : SIGNALER UN FAIT
              ==================================================================== -->
         <section id="view-new" class="view-section">
-            <div class="form-card">
-                <h2 style="font-size: 1.25rem; margin-bottom: 6px;">Signaler un fait vérifiable</h2>
-                <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 20px;">
-                    Votre signalement restera anonyme. Seuls le lieu et le problème objectif seront traités.
-                </p>
+            <h2 class="view-title">Signaler un fait</h2>
+            <p class="view-subtitle">Nous publions le lieu et le fait constaté, jamais votre identité.</p>
 
-                <form id="report-form">
-                    <!-- 1. Catégorie -->
-                    <div class="form-group">
-                        <label class="form-label" for="category-select">Catégorie <span class="required">*</span></label>
-                        <select id="category-select" class="form-select" required>
-                            <option value="">Sélectionnez une catégorie...</option>
-                            <option value="insalubrite">🗑️ Insalubrité & Bâtiments dangereux (Public immédiatement)</option>
-                            <option value="sante">🏥 Santé & Hôpitaux (Public après 3 signalements concordants)</option>
-                            <option value="mairies_services">🏛️ Mairies & Services Publics (Public après recoupement)</option>
-                            <option value="securite">🛡️ Sécurité (Affiché en zone de vigilance sur carte)</option>
+            <form id="report-form">
+                <!-- Catégorie * -->
+                <div class="field-group">
+                    <label class="field-label" for="category-select">Catégorie *</label>
+                    <select id="category-select" class="field-select" required>
+                        <option value="">Choisir une catégorie</option>
+                        <option value="sante">Santé</option>
+                        <option value="insalubrite">Insalubrité</option>
+                        <option value="mairies_services">Mairies et services publics</option>
+                        <option value="securite">Sécurité</option>
+                    </select>
+                </div>
+
+                <!-- Établissement ou lieu * -->
+                <div class="field-group">
+                    <label class="field-label" id="establishment-or-location-label" for="establishment-select">Établissement ou lieu *</label>
+                    
+                    <div id="establishment-select-wrap">
+                        <select id="establishment-select" class="field-select">
+                            <option value="">Choisir dans la liste</option>
                         </select>
                     </div>
 
-                    <!-- 2. Zone dynamique selon la catégorie sélectionnée -->
-                    <div id="dynamic-category-fields">
-                        <!-- Rempli dynamiquement par JS selon la catégorie -->
+                    <div id="free-location-wrap" style="display: none; margin-top: 6px;">
+                        <input type="text" id="location-input" class="field-input" placeholder="Précisez le lieu (croisement, quartier, repère)..." maxlength="120">
                     </div>
 
-                    <!-- 3. Localisation -->
-                    <div class="form-group" id="location-group">
-                        <label class="form-label" for="location-input" id="location-label">Lieu précis ou repère <span class="required">*</span></label>
-                        <input type="text" id="location-input" class="form-control" placeholder="Ex: Croisement 22 Parcelles, Entrée Urgences Fann..." required maxlength="100">
-                        <div id="gps-button-container" style="display: flex; gap: 8px; margin-top: 6px;">
-                            <button type="button" id="btn-gps" class="btn-action" style="font-size: 0.78rem;">
-                                📍 Utiliser ma position GPS
-                            </button>
-                            <span id="gps-status" style="font-size: 0.75rem; color: var(--text-muted); align-self: center;"></span>
-                        </div>
-                        <input type="hidden" id="lat-input">
-                        <input type="hidden" id="lng-input">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button type="button" id="btn-gps" class="btn-use-location">
+                            📍 Utiliser ma position
+                        </button>
+                        <span id="gps-status" style="font-size: 0.72rem; color: var(--text-muted);"></span>
                     </div>
+                    <input type="hidden" id="lat-input">
+                    <input type="hidden" id="lng-input">
+                </div>
 
-                    <!-- 4. Date & Heure du fait -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;" class="form-group">
-                        <div>
-                            <label class="form-label" for="incident-date">Date du fait <span class="required">*</span></label>
-                            <input type="date" id="incident-date" class="form-control" required>
-                        </div>
-                        <div>
-                            <label class="form-label" for="incident-time">Heure constatée</label>
-                            <input type="time" id="incident-time" class="form-control">
-                        </div>
+                <!-- Champs dynamiques contextuels (Services, Types de faits) -->
+                <div id="dynamic-category-fields"></div>
+
+                <!-- Date du fait * et Heure -->
+                <div class="field-group row-2-col">
+                    <div>
+                        <label class="field-label" for="incident-date">Date du fait *</label>
+                        <input type="date" id="incident-date" class="field-input" required>
                     </div>
-
-                    <!-- 5. Description factuelle (Strictement aucun nom propre) -->
-                    <div class="form-group">
-                        <label class="form-label" for="description-input">
-                            Description purement factuelle <span class="required">*</span>
-                        </label>
-                        <textarea id="description-input" class="form-textarea" rows="3" maxlength="500" placeholder="Décrivez uniquement l'état matériel, les horaires ou le problème constaté. AUCUN NOM d'agent ni accusation personnelle." required></textarea>
-                        <div class="char-counter"><span id="char-count">0</span> / 500</div>
-                        <div id="filter-warning" style="display: none; background: #fff1f2; color: #be123c; padding: 8px; border-radius: 6px; font-size: 0.78rem; margin-top: 6px;">
-                            ⚠️ Votre texte semble contenir un nom propre ou un terme sensible. Merci de décrire uniquement l'infrastructure ou le service sans viser de personne.
-                        </div>
+                    <div>
+                        <label class="field-label" for="incident-time">Heure</label>
+                        <input type="time" id="incident-time" class="field-input">
                     </div>
+                </div>
 
-                    <!-- 6. Preuve Photo (Obligatoire pour insalubrité) -->
-                    <div class="form-group" id="photo-group">
-                        <label class="form-label" id="photo-label">
-                            Photo du lieu / de l'anomalie
-                        </label>
-                        <input type="file" id="photo-input" accept="image/*" class="form-control" style="font-size: 0.85rem;">
-                        <p class="form-help">
-                            🔒 <strong>Important :</strong> Photographiez uniquement l'anomalie matérielle (fissure, déchets, panneau). Aucun visage ni plaque d'immatriculation.
-                        </p>
-                        <div id="photo-preview-container" style="display: none; margin-top: 10px;">
-                            <img id="photo-preview" src="" alt="Aperçu compressé" style="max-height: 180px; border-radius: 8px; border: 1px solid var(--border-color);">
-                            <div id="photo-compression-info" style="font-size: 0.72rem; color: var(--vert-sn); font-weight: 600; margin-top: 4px;"></div>
-                        </div>
+                <!-- Description factuelle * -->
+                <div class="field-group">
+                    <label class="field-label" for="description-input">Description factuelle *</label>
+                    <textarea id="description-input" class="field-textarea" rows="4" maxlength="500" placeholder="Décrivez l'état des lieux, les horaires ou le problème constaté. Pas de noms de personnes." required></textarea>
+                    <div class="char-counter-right"><span id="char-count">0</span> / 500</div>
+                    <div id="filter-warning" style="display: none; background: #fff1f2; color: #be123c; padding: 6px 10px; border-radius: 4px; font-size: 0.75rem; margin-top: 4px;">
+                        ⚠️ Rappel : Veuillez ne mentionner aucun nom propre de personne.
                     </div>
+                </div>
 
-                    <!-- 7. Rôle du déclarant -->
-                    <div class="form-group">
-                        <label class="form-label">Votre rôle <span class="required">*</span></label>
-                        <div style="display: flex; gap: 10px;">
-                            <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 4px;">
-                                <input type="radio" name="reporter_role" value="present" checked> Présent sur place
-                            </label>
-                            <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 4px;">
-                                <input type="radio" name="reporter_role" value="victime"> Usager directement impacté
-                            </label>
-                            <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 4px;">
-                                <input type="radio" name="reporter_role" value="rapporte"> Constaté / Rapporté
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Bouton Soumettre -->
-                    <button type="submit" id="btn-submit-report" class="btn-submit">
-                        Transmettre ce fait citoyen 🚀
+                <!-- Photo du lieu (facultatif) -->
+                <div class="field-group">
+                    <label class="field-label" id="photo-field-label">Photo du lieu (facultatif)</label>
+                    <input type="file" id="photo-input" accept="image/*" style="display: none;">
+                    <button type="button" class="btn-add-photo" id="btn-trigger-photo">
+                        📷 Ajouter une photo
                     </button>
-                </form>
-            </div>
+                    <div id="photo-preview-container" style="display: none; margin-top: 8px;">
+                        <img id="photo-preview" src="" alt="Aperçu" style="max-height: 160px; border-radius: 6px; border: 1px solid var(--border-color);">
+                        <div id="photo-compression-info" style="font-size: 0.72rem; color: var(--primary-green); font-weight: 600; margin-top: 2px;"></div>
+                    </div>
+                    <p class="field-disclaimer">Photographiez uniquement le problème matériel. Pas de visages ni de plaques.</p>
+                </div>
+
+                <!-- Votre rôle * -->
+                <div class="field-group">
+                    <label class="field-label">Votre rôle *</label>
+                    <div class="radio-options-list">
+                        <label class="radio-item">
+                            <input type="radio" name="reporter_role" value="present" checked> J'étais présent
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="reporter_role" value="victime"> Je suis directement concerné
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="reporter_role" value="rapporte"> On me l'a rapporté
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Bouton Envoyer le signalement -->
+                <button type="submit" id="btn-submit-report" class="btn-primary-submit">
+                    Envoyer le signalement
+                </button>
+
+                <p class="terms-note">
+                    En envoyant, vous acceptez la <a onclick="openInfoModal()">Charte</a>.
+                </p>
+            </form>
         </section>
 
         <!-- ====================================================================
-             VUE 3 : CARTE INTERACTIVE LEAFLET / OSM
-             ==================================================================== -->
-        <section id="view-map" class="view-section">
-            <h2 style="font-size: 1.15rem; margin-bottom: 8px;">Carte Publique des Faits Constatés</h2>
-            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 14px;">
-                Visualisez la répartition géographique des incidents confirmés et des zones de vigilance au Sénégal.
-            </p>
-            <div id="map-container"></div>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.75rem; color: var(--text-secondary); margin-top: 6px;">
-                <span>🔴 Insalubrité / Bâtiment</span>
-                <span>🔵 Santé publique</span>
-                <span>🟡 Mairie & Services</span>
-                <span>🟣 Zone de vigilance</span>
-            </div>
-        </section>
-
-        <!-- ====================================================================
-             VUE 4 : STATISTIQUES PUBLIQUES PAR ÉTABLISSEMENT
+             ÉCRAN 3 : STATISTIQUES PAR ÉTABLISSEMENT
              ==================================================================== -->
         <section id="view-stats" class="view-section">
-            <h2 style="font-size: 1.15rem; margin-bottom: 8px;">Statistiques Publiques par Établissement</h2>
-            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 16px;">
-                Données consolidées objectives sur la qualité de service et la réactivité des structures publiques.
+            <h2 class="view-title">Statistiques par établissement</h2>
+            <p class="view-subtitle">Période : [trimestre en cours]</p>
+
+            <div class="category-filter-row">
+                <button class="filter-btn active" data-stat-cat="all">Tous</button>
+                <button class="filter-btn" data-stat-cat="hopital">🏥 Santé</button>
+                <button class="filter-btn" data-stat-cat="mairie">🏛️ Mairies</button>
+            </div>
+
+            <div class="stats-metrics-row">
+                <div class="metric-box">
+                    <div class="metric-val" id="stat-total-reports">0</div>
+                    <div class="metric-label">Faits documentés</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-val" id="stat-resolved-rate">0%</div>
+                    <div class="metric-label">Problèmes résolus</div>
+                </div>
+            </div>
+
+            <!-- Tableau d'établissements -->
+            <div class="stats-table-wrap">
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>Établissement</th>
+                            <th>Signalements</th>
+                            <th>Résolus</th>
+                        </tr>
+                    </thead>
+                    <tbody id="establishments-table-body">
+                        <!-- Rempli par app.js -->
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="stats-disclaimer">
+                Les chiffres incluent les signalements reçus, y compris ceux en attente de recoupement. Ils décrivent des faits signalés par des citoyens, pas un jugement sur les personnes.
             </p>
+        </section>
 
-            <div class="stat-card-grid">
-                <div class="stat-metric-card">
-                    <div class="stat-metric-value" id="stat-total-reports">0</div>
-                    <div class="stat-metric-label">Faits documentés</div>
-                </div>
-                <div class="stat-metric-card">
-                    <div class="stat-metric-value" id="stat-resolved-rate">0%</div>
-                    <div class="stat-metric-label">Problèmes résolus</div>
-                </div>
-            </div>
-
-            <!-- Liste des établissements avec métriques -->
-            <div id="establishments-stats-list">
-                <!-- Rempli par app.js -->
-            </div>
+        <!-- ====================================================================
+             ÉCRAN CARTE (LEAFLET / CLUSTERING)
+             ==================================================================== -->
+        <section id="view-map" class="view-section">
+            <h2 class="view-title">Carte des faits signalés</h2>
+            <p class="view-subtitle">Répartition géographique et zones de vigilance</p>
+            <div id="map-container"></div>
         </section>
 
     </main>
 
     <!-- ====================================================================
-         BARRE DE NAVIGATION BASSE (MOBILE FIRST)
+         BARRE DE NAVIGATION BASSE (4 ONGLETS CONFORMES MAQUETTE)
          ==================================================================== -->
     <nav class="bottom-nav">
-        <button class="nav-item active" data-target="view-feed">
+        <button class="bottom-nav-item active" data-target="view-feed">
             <span class="nav-icon">📋</span>
-            <span>Fil Public</span>
+            <span>Fil public</span>
         </button>
-        <button class="nav-item" data-target="view-new">
+        <button class="bottom-nav-item" data-target="view-new">
             <span class="nav-icon">➕</span>
             <span>Signaler</span>
         </button>
-        <button class="nav-item" data-target="view-map">
+        <button class="bottom-nav-item" data-target="view-map">
             <span class="nav-icon">🗺️</span>
             <span>Carte</span>
         </button>
-        <button class="nav-item" data-target="view-stats">
+        <button class="bottom-nav-item" data-target="view-stats">
             <span class="nav-icon">📊</span>
             <span>Statistiques</span>
         </button>
@@ -247,64 +264,42 @@
     <!-- ====================================================================
          MODALES
          ==================================================================== -->
-
-    <!-- Modal 1 : Signaler un contenu abusif (Retrait sous 24-48h) -->
     <div id="modal-flag" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>🚩 Demande de modération / retrait</h3>
-                <button type="button" class="btn-close-modal" id="btn-close-flag">&times;</button>
-            </div>
-            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 14px;">
-                Tout contenu contenant des noms de personnes, des visages, des insultes ou des faits infondés est retiré sous 24 à 48 heures.
+        <div class="modal-box">
+            <h3 style="font-size: 1rem; color: var(--text-main); margin-bottom: 8px;">🚩 Demande de retrait</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                Tout contenu contenant des noms d'agents, des visages ou des insultes est retiré sous 24h.
             </p>
             <form id="flag-form">
                 <input type="hidden" id="flag-report-id">
-                <div class="form-group">
-                    <label class="form-label" for="flag-reason">Motif de la demande <span class="required">*</span></label>
-                    <select id="flag-reason" class="form-select" required>
-                        <option value="">Choisissez le motif...</option>
-                        <option value="nom_de_personne">Mention de nom ou prénom d'un individu</option>
+                <div class="field-group">
+                    <select id="flag-reason" class="field-select" required>
+                        <option value="">Motif du signalement...</option>
+                        <option value="nom_de_personne">Mention de nom/prénom d'un individu</option>
                         <option value="visage_visible">Visage ou plaque d'immatriculation visible</option>
-                        <option value="diffamation_accusation">Accusation sans fait matériel vérifiable</option>
-                        <option value="faux_fait">Fait inexact ou déjà réparé</option>
+                        <option value="diffamation_accusation">Accusation sans fait matériel</option>
+                        <option value="faux_fait">Fait inexact</option>
                         <option value="autre">Autre motif légitime</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label class="form-label" for="flag-details">Précisions utiles</label>
-                    <textarea id="flag-details" class="form-textarea" rows="2" placeholder="Expliquez brièvement..."></textarea>
+                <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px;">
+                    <button type="button" class="btn-moi-aussi" id="btn-cancel-flag">Annuler</button>
+                    <button type="submit" class="btn-primary-submit" style="margin: 0; width: auto; padding: 6px 14px; background: var(--sn-red);">Signaler</button>
                 </div>
-                <button type="submit" class="btn-submit" style="background: var(--rouge-sn);">
-                    Envoyer le signalement à l'équipe
-                </button>
             </form>
         </div>
     </div>
 
-    <!-- Modal 2 : Charte & Principes factuels -->
+    <!-- Modale Charte -->
     <div id="modal-info" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>🇸🇳 Charte Citoyenne SignalsSN</h3>
-                <button type="button" class="btn-close-modal" id="btn-close-info">&times;</button>
+        <div class="modal-box">
+            <h3 style="font-size: 1.05rem; color: var(--primary-green); margin-bottom: 8px;">🇸🇳 Charte Citoyenne SignalSN</h3>
+            <div style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">
+                <p><strong>Des faits, pas des accusations :</strong><br>Nous documentons les pannes, absences d'équipement et dysfonctionnements matériels. Aucun nom d'agent public n'est publié.</p>
+                <br>
+                <p><strong>Recoupement automatique :</strong><br>Pour les hôpitaux et mairies, les faits sont confirmés dès qu'au moins 3 signalements concordants sont enregistrés.</p>
             </div>
-            <div style="font-size: 0.85rem; color: #334155; line-height: 1.6;">
-                <p><strong>1. Signaler des faits, jamais des personnes :</strong><br>
-                Nous documentons l'état des services publics (délais, pannes, absences d'équipement) et les anomalies physiques (fissures, ordures). Les noms propres sont interdits.</p>
-                <br>
-                <p><strong>2. Règle de recoupement Santé & Mairies :</strong><br>
-                Pour éviter toute manipulation, les signalements hospitaliers ne deviennent publics qu'après <strong>3 signalements concordants</strong>.</p>
-                <br>
-                <p><strong>3. Respect de la vie privée :</strong><br>
-                Aucune donnée personnelle n'est exigée des citoyens pour témoigner.</p>
-                <br>
-                <p><strong>4. Droit de réponse :</strong><br>
-                Tout établissement concerné dispose d'un espace pour publier son droit de réponse ou annoncer la prise en charge des travaux.</p>
-            </div>
-            <button type="button" class="btn-submit" id="btn-close-info-ok" style="margin-top: 16px;">
-                J'ai compris et j'adhère
-            </button>
+            <button type="button" class="btn-primary-submit" id="btn-close-info" style="margin-top: 14px;">Fermer</button>
         </div>
     </div>
 
