@@ -27,6 +27,8 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 CREATE TYPE report_category AS ENUM (
     'insalubrite',       -- Insalubrité & bâtiments dangereux (immédiatement public avec photo)
+    'voirie',            -- 🚧 Routes et voirie (immédiatement public, photo recommandée)
+    'eau_electricite',   -- 💧 Eau et électricité (faits matériels public immédiatement, coupures après recoupement)
     'sante',             -- Santé (public après 3 signalements concordants)
     'mairies_services',  -- Mairies & services publics (public après recoupement)
     'securite'           -- Sécurité (agrégation par zones, jamais de récit brut)
@@ -230,6 +232,52 @@ BEGIN
             NEW.status := 'confirme';
         END IF;
         RETURN NEW;
+    END IF;
+
+    -- 6. Voirie : visible immédiatement (faits matériels, risque faible)
+    IF NEW.category = 'voirie' THEN
+        NEW.is_publicly_visible := true;
+        IF NEW.status = 'recu' THEN
+            NEW.status := 'confirme';
+        END IF;
+        RETURN NEW;
+    END IF;
+
+    -- 7. Eau et électricité : 
+    -- Visible immédiatement pour les faits matériels (fuite, poteau penché, câble dénudé, danger immédiat)
+    -- Recoupement requis pour les coupures d'eau/électricité
+    IF NEW.category = 'eau_electricite' THEN
+        IF NEW.immediate_danger OR NEW.fact_type IN ('fuite_eau', 'poteau_cable_dangereux', 'borne_compteur_hors_service', 'eau_non_potable') THEN
+            NEW.is_publicly_visible := true;
+            IF NEW.status = 'recu' THEN
+                NEW.status := 'confirme';
+            END IF;
+            RETURN NEW;
+        ELSE
+            -- Coupures d'eau ou électricité : public dès 3 signalements concordants dans le secteur
+            SELECT COUNT(*) INTO concordant_count
+            FROM public.reports
+            WHERE category = 'eau_electricite'
+              AND location_name = NEW.location_name
+              AND fact_type = NEW.fact_type
+              AND created_at >= NOW() - INTERVAL '7 days';
+
+            IF (concordant_count + 1) >= 3 THEN
+                NEW.is_publicly_visible := true;
+                NEW.status := 'confirme';
+                UPDATE public.reports
+                SET is_publicly_visible = true, status = 'confirme'
+                WHERE category = 'eau_electricite'
+                  AND location_name = NEW.location_name
+                  AND fact_type = NEW.fact_type
+                  AND created_at >= NOW() - INTERVAL '7 days'
+                  AND is_publicly_visible = false;
+            ELSE
+                NEW.is_publicly_visible := false;
+                NEW.status := 'recu';
+            END IF;
+            RETURN NEW;
+        END IF;
     END IF;
 
     -- Santé : visible dès 3 signalements concordants

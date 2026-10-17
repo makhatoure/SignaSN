@@ -54,6 +54,8 @@
             <!-- Filtres par catégorie -->
             <div class="category-filter-row">
                 <button class="filter-btn active" data-category="all">Tous</button>
+                <button class="filter-btn" data-category="voirie">🚧 Voirie</button>
+                <button class="filter-btn" data-category="eau_electricite">💧 Eau & Électricité</button>
                 <button class="filter-btn" data-category="insalubrite">🧹 Insalubrité</button>
                 <button class="filter-btn" data-category="sante">🏥 Santé</button>
                 <button class="filter-btn" data-category="mairies_services">🏛️ Mairies</button>
@@ -88,10 +90,12 @@
                     <label class="field-label" for="category-select">Catégorie *</label>
                     <select id="category-select" class="field-select" required>
                         <option value="">Choisir une catégorie</option>
-                        <option value="sante">Santé</option>
-                        <option value="insalubrite">Insalubrité</option>
-                        <option value="mairies_services">Mairies et services publics</option>
-                        <option value="securite">Sécurité</option>
+                        <option value="voirie">🚧 Routes et voirie</option>
+                        <option value="eau_electricite">💧 Eau et électricité</option>
+                        <option value="insalubrite">🧹 Insalubrité</option>
+                        <option value="sante">🏥 Santé</option>
+                        <option value="mairies_services">🏛️ Mairies et services publics</option>
+                        <option value="securite">🛡️ Sécurité</option>
                     </select>
                 </div>
 
@@ -194,6 +198,8 @@
 
             <div class="category-filter-row">
                 <button class="filter-btn active" data-stat-cat="all">Tous</button>
+                <button class="filter-btn" data-stat-cat="voirie">🚧 Voirie</button>
+                <button class="filter-btn" data-stat-cat="eau_electricite">💧 Eau & Électricité</button>
                 <button class="filter-btn" data-stat-cat="insalubrite">🧹 Insalubrité</button>
                 <button class="filter-btn" data-stat-cat="hopital">🏥 Santé</button>
                 <button class="filter-btn" data-stat-cat="mairie">🏛️ Mairies</button>

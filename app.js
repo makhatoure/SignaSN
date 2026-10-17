@@ -106,6 +106,40 @@ let demoReports = [
         moi_aussi_count: 27,
         is_publicly_visible: true,
         created_at: new Date(Date.now() - 3600000 * 20).toISOString()
+    },
+    {
+        id: "rep-4",
+        category: "voirie",
+        status: "confirme",
+        establishment_name: "Axe VDN - Échangeur Foire",
+        location_name: "VDN, Foire, Dakar",
+        latitude: 14.7325,
+        longitude: -17.4610,
+        incident_date: "2026-10-16",
+        incident_time: "12:00",
+        fact_type: "Nid-de-poule dangereux",
+        factual_description: "Nid-de-poule profond sur la voie rapide provoquant des freinages brusques.",
+        immediate_danger: true,
+        moi_aussi_count: 53,
+        is_publicly_visible: true,
+        created_at: new Date(Date.now() - 3600000 * 6).toISOString()
+    },
+    {
+        id: "rep-5",
+        category: "eau_electricite",
+        status: "confirme",
+        establishment_name: "Médina, Rue 22",
+        location_name: "Médina, Dakar",
+        latitude: 14.6890,
+        longitude: -17.4520,
+        incident_date: "2026-10-16",
+        incident_time: "16:20",
+        fact_type: "Fuite d'eau sur voie publique",
+        factual_description: "Canalisation principale d'eau rompue déversant de l'eau sur la chaussée depuis le matin.",
+        immediate_danger: false,
+        moi_aussi_count: 31,
+        is_publicly_visible: true,
+        created_at: new Date(Date.now() - 3600000 * 2).toISOString()
     }
 ];
 
@@ -224,6 +258,8 @@ async function renderReportsList() {
     if (filtered.length === 0) {
         const catNames = {
             insalubrite: "Insalubrité",
+            voirie: "Routes et voirie",
+            eau_electricite: "Eau et électricité",
             sante: "Santé",
             mairies_services: "Mairies",
             securite: "Sécurité"
@@ -244,8 +280,10 @@ async function renderReportsList() {
     const userVotes = JSON.parse(localStorage.getItem("signalsn_user_votes") || "{}");
     
     const catIcons = {
-        sante: "🏥 Santé",
+        voirie: "🚧 Voirie",
+        eau_electricite: "💧 Eau & Électricité",
         insalubrite: "🧹 Insalubrité",
+        sante: "🏥 Santé",
         mairies_services: "🏛️ Services publics",
         securite: "🛡️ Sécurité"
     };
@@ -373,19 +411,104 @@ function populateEstablishmentDropdown(filterCat = null) {
 function renderDynamicCategoryFields(category) {
     populateEstablishmentDropdown(category);
     
-    if (category === "insalubrite" || category === "securite") {
-        // Pour l'insalubrité et sécurité : champ libre ouvert
+    if (category === "insalubrite" || category === "voirie" || category === "eau_electricite" || category === "securite") {
         establishmentSelectWrap.style.display = "none";
         freeLocationWrap.style.display = "block";
         locationInput.required = true;
+        
+        if (category === "voirie") {
+            locationInput.placeholder = "Axe routier ou repère (Ex: VDN Échangeur Foire, RN1 Rufisque)...";
+        } else if (category === "eau_electricite") {
+            locationInput.placeholder = "Quartier et rue (Ex: Médina Rue 22, Parcelles Unité 15)...";
+        } else if (category === "insalubrite") {
+            locationInput.placeholder = "Lieu précis (Ex: Croisement Case Bi, près de l'école)...";
+        }
     } else {
-        // Pour santé et mairies : liste prédéfinie prioritaire
         establishmentSelectWrap.style.display = "block";
         freeLocationWrap.style.display = "none";
         locationInput.required = false;
     }
     
-    if (category === "sante") {
+    // 6. Routes et voirie
+    if (category === "voirie") {
+        dynamicFieldsContainer.innerHTML = `
+            <div class="field-group">
+                <label class="field-label">Type d'anomalie de voirie *</label>
+                <select id="fact-type-select" class="field-select" required>
+                    <option value="Nid-de-poule">Nid-de-poule dangereux</option>
+                    <option value="Route dégradée">Route dégradée / Chaussée défoncée</option>
+                    <option value="Inondation chaussée">Inondation de la chaussée</option>
+                    <option value="Éclairage public en panne">Éclairage public en panne</option>
+                    <option value="Signalisation absente ou endommagée">Signalisation absente ou endommagée</option>
+                    <option value="Trottoir ou caniveau cassé">Trottoir ou caniveau cassé</option>
+                </select>
+            </div>
+            <div class="field-group">
+                <label class="field-label">Commune *</label>
+                <input type="text" id="commune-input" class="field-input" placeholder="Ex: Grand Yoff, Rufisque, Parcelles Assainies..." required>
+            </div>
+            <div class="field-group">
+                <label style="font-size: 0.84rem; display: flex; align-items: center; gap: 6px; color: var(--sn-red); font-weight: 600;">
+                    <input type="checkbox" id="immediate-danger-checkbox"> ⚠️ Danger immédiat pour les usagers
+                </label>
+            </div>
+        `;
+    }
+    
+    // 7. Eau et électricité
+    else if (category === "eau_electricite") {
+        dynamicFieldsContainer.innerHTML = `
+            <div class="field-group">
+                <label class="field-label">Type de fait *</label>
+                <select id="fact-type-select" class="field-select" required onchange="toggleCoupureDuration(this.value)">
+                    <option value="Fuite d'eau sur voie publique">Fuite d'eau importante sur la voie publique</option>
+                    <option value="Poteau ou câble dangereux">Poteau penché ou câble dénudé dangereux</option>
+                    <option value="Coupure d'eau">Coupure d'eau</option>
+                    <option value="Coupure d'électricité">Coupure d'électricité</option>
+                    <option value="Eau non potable constatée">Eau non potable constatée (couleur / odeur)</option>
+                    <option value="Compteur ou borne-fontaine HS">Compteur ou borne-fontaine hors service</option>
+                </select>
+            </div>
+            <div class="field-group" id="coupure-duration-group" style="display: none;">
+                <label class="field-label">Durée constatée de la coupure</label>
+                <select id="duration-input" class="field-select">
+                    <option value="Moins de 2h">Moins de 2 heures</option>
+                    <option value="2h à 6h">2h à 6 heures</option>
+                    <option value="6h à 24h">6h à 24 heures</option>
+                    <option value="Plus de 24h">Plus de 24 heures</option>
+                </select>
+            </div>
+            <div class="field-group">
+                <label style="font-size: 0.84rem; display: flex; align-items: center; gap: 6px; color: var(--sn-red); font-weight: 600;">
+                    <input type="checkbox" id="immediate-danger-checkbox"> ⚠️ Danger immédiat (câble à terre, étincelles...)
+                </label>
+            </div>
+            <p class="field-disclaimer">ℹ️ Les faits portent sur le lieu et le service. Les noms des opérateurs ne sont jamais publiés.</p>
+        `;
+    }
+    
+    // 1. Insalubrité (sans câble dénudé, déplacé en eau_electricite)
+    else if (category === "insalubrite") {
+        dynamicFieldsContainer.innerHTML = `
+            <div class="field-group">
+                <label class="field-label">Type d'anomalie *</label>
+                <select id="fact-type-select" class="field-select" required>
+                    <option value="Déchets">Déchets / Dépôt sauvage d'ordures</option>
+                    <option value="Fissure / Risque effondrement">Fissure ou bâtiment menaçant ruine</option>
+                    <option value="Eau stagnante">Eau stagnante / Moustiques / Eaux usées</option>
+                    <option value="Caniveau ou bouche d'égout ouverte">Caniveau ou bouche d'égout à ciel ouvert</option>
+                </select>
+            </div>
+            <div class="field-group">
+                <label style="font-size: 0.84rem; display: flex; align-items: center; gap: 6px; color: var(--sn-red); font-weight: 600;">
+                    <input type="checkbox" id="immediate-danger-checkbox"> ⚠️ Danger immédiat pour la sécurité
+                </label>
+            </div>
+        `;
+    }
+    
+    // 2. Santé
+    else if (category === "sante") {
         dynamicFieldsContainer.innerHTML = `
             <div class="field-group">
                 <label class="field-label">Type de fait constaté *</label>
@@ -398,25 +521,10 @@ function renderDynamicCategoryFields(category) {
                 </select>
             </div>
         `;
-    } else if (category === "insalubrite") {
-        dynamicFieldsContainer.innerHTML = `
-            <div class="field-group">
-                <label class="field-label">Type d'anomalie *</label>
-                <select id="fact-type-select" class="field-select" required>
-                    <option value="Déchets">Déchets / Dépôt sauvage d'ordures</option>
-                    <option value="Fissure / Risque effondrement">Fissure ou bâtiment menaçant ruine</option>
-                    <option value="Eau stagnante">Eau stagnante / Canalisation rompue</option>
-                    <option value="Câble dénudé">Câble électrique dénudé sur voie publique</option>
-                    <option value="Nid-de-poule dangereux">Chaussée détériorée ou nid-de-poule dangereux</option>
-                </select>
-            </div>
-            <div class="field-group">
-                <label style="font-size: 0.84rem; display: flex; align-items: center; gap: 6px; color: var(--sn-red); font-weight: 600;">
-                    <input type="checkbox" id="immediate-danger-checkbox"> ⚠️ Danger immédiat pour la sécurité
-                </label>
-            </div>
-        `;
-    } else if (category === "mairies_services") {
+    }
+    
+    // 3. Mairies & services
+    else if (category === "mairies_services") {
         dynamicFieldsContainer.innerHTML = `
             <div class="field-group">
                 <label class="field-label">Type de fait administratif *</label>
@@ -428,7 +536,10 @@ function renderDynamicCategoryFields(category) {
                 </select>
             </div>
         `;
-    } else if (category === "securite") {
+    }
+    
+    // 4. Sécurité
+    else if (category === "securite") {
         dynamicFieldsContainer.innerHTML = `
             <div class="field-group">
                 <label class="field-label">Type d'incident *</label>
@@ -578,7 +689,7 @@ reportForm.addEventListener("submit", async (e) => {
         photo_url: compressedPhotoData,
         reporter_role: document.querySelector('input[name="reporter_role"]:checked').value,
         device_fingerprint: getDeviceFingerprint(),
-        is_publicly_visible: (category === "insalubrite" || category === "securite"),
+        is_publicly_visible: (category === "insalubrite" || category === "voirie" || (category === "eau_electricite" && (immediateDanger || !factType.includes("Coupure"))) || category === "securite"),
         moi_aussi_count: 1,
         created_at: new Date().toISOString()
     };
@@ -593,8 +704,9 @@ reportForm.addEventListener("submit", async (e) => {
         demoReports.unshift({ id: "rep-" + Date.now(), ...newReport });
     }
     
-    alert(category === "sante" 
-        ? "Signalement reçu. Il sera visible publiquement après recoupement de 3 signalements concordants."
+    const isPendingRecoupement = (category === "sante" || (category === "eau_electricite" && factType.includes("Coupure")));
+    alert(isPendingRecoupement 
+        ? "Signalement reçu. Il sera visible publiquement après recoupement de plusieurs signalements concordants."
         : "Signalement enregistré avec succès.");
         
     reportForm.reset();
@@ -607,7 +719,15 @@ reportForm.addEventListener("submit", async (e) => {
     document.querySelector('.bottom-nav-item[data-target="view-feed"]').click();
 });
 
-// --- 7. STATISTIQUES PAR ÉTABLISSEMENT (IMAGE 3) ---
+// Toggle durée de coupure
+window.toggleCoupureDuration = function(val) {
+    const group = document.getElementById("coupure-duration-group");
+    if (group) {
+        group.style.display = (val === "Coupure d'eau" || val === "Coupure d'électricité") ? "block" : "none";
+    }
+};
+
+// --- 7. STATISTIQUES PAR ÉTABLISSEMENT / SECTEUR ---
 const statFilterButtons = document.querySelectorAll("#view-stats .filter-btn");
 statFilterButtons.forEach(btn => {
     btn.addEventListener("click", () => {
@@ -628,6 +748,10 @@ async function loadEstablishmentStats() {
     let categoryReports = reports;
     if (currentStatFilter === "insalubrite") {
         categoryReports = reports.filter(r => r.category === "insalubrite");
+    } else if (currentStatFilter === "voirie") {
+        categoryReports = reports.filter(r => r.category === "voirie");
+    } else if (currentStatFilter === "eau_electricite") {
+        categoryReports = reports.filter(r => r.category === "eau_electricite");
     } else if (currentStatFilter === "hopital") {
         categoryReports = reports.filter(r => r.category === "sante");
     } else if (currentStatFilter === "mairie") {
@@ -641,7 +765,8 @@ async function loadEstablishmentStats() {
     
     let rowsData = [];
     
-    if (currentStatFilter === "insalubrite") {
+    // Agrégation par lieu / commune pour insalubrité, voirie ou eau/électricité
+    if (currentStatFilter === "insalubrite" || currentStatFilter === "voirie" || currentStatFilter === "eau_electricite") {
         const mapZones = {};
         categoryReports.forEach(r => {
             const loc = r.location_name || "Zone non spécifiée";
@@ -670,9 +795,9 @@ async function loadEstablishmentStats() {
         });
         
         if (currentStatFilter === "all") {
-            const insalubreReports = reports.filter(r => r.category === "insalubrite");
+            const nonEstReports = reports.filter(r => r.category === "insalubrite" || r.category === "voirie" || r.category === "eau_electricite");
             const mapZones = {};
-            insalubreReports.forEach(r => {
+            nonEstReports.forEach(r => {
                 const loc = r.location_name || "Zone non spécifiée";
                 if (!mapZones[loc]) mapZones[loc] = { name: loc, count: 0, resolved: 0 };
                 mapZones[loc].count++;
@@ -725,10 +850,19 @@ function initOrRefreshMap() {
         markerClusterGroup = L.markerClusterGroup({ maxClusterRadius: 45, spiderfyOnMaxZoom: true });
     }
     
+    const catColors = {
+        voirie: "#ea580c",        // Orange voirie
+        eau_electricite: "#0284c7",// Bleu eau/élec
+        sante: "#059669",          // Vert santé
+        insalubrite: "#dc2626",    // Rouge insalubrité
+        mairies_services: "#ca8a04",// Jaune mairies
+        securite: "#7c3aed"        // Violet sécurité
+    };
+
     fetchReports().then(reports => {
         reports.forEach(r => {
             if (r.latitude && r.longitude) {
-                const color = r.category === "sante" ? "#0284c7" : (r.category === "insalubrite" ? "#dc2626" : "#0b6637");
+                const color = catColors[r.category] || "#0b6637";
                 const marker = L.circleMarker([r.latitude, r.longitude], {
                     radius: 8,
                     fillColor: color,
