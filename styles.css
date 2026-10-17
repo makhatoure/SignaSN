@@ -607,3 +607,142 @@ body {
     max-width: 440px;
     padding: 20px;
 }
+
+/* ==============================================================================
+   BANDEAU URGENCE (Formulaire Signaler)
+   ============================================================================== */
+.urgency-alert-banner {
+    background: #fff1f2;
+    border: 1.5px solid #fca5a5;
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    font-size: 0.82rem;
+    color: #991b1b;
+    line-height: 1.5;
+}
+.urgency-alert-banner strong {
+    color: #7f1d1d;
+}
+.urgency-numbers {
+    display: inline-block;
+    margin-top: 4px;
+}
+.urgency-numbers a {
+    color: #b91c1c;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.urgency-numbers a:hover {
+    text-decoration: underline;
+}
+
+/* ==============================================================================
+   MINI-ALERTE URGENCE (Footer du fil public)
+   ============================================================================== */
+.urgency-footer {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #b91c1c;
+    background: #fff1f2;
+    border-radius: var(--radius-sm);
+    padding: 7px 12px;
+    margin-bottom: 10px;
+    border: 1px solid #fca5a5;
+}
+.urgency-footer a {
+    color: #7f1d1d;
+    font-weight: 700;
+    text-decoration: none;
+}
+.urgency-footer a:hover {
+    text-decoration: underline;
+}
+
+/* ==============================================================================
+   STATUT : SIGNALEMENT CITOYEN NON CONFIRMÉ
+   ============================================================================== */
+.pill-non-confirmed {
+    background: #fef9c3 !important;
+    color: #713f12 !important;
+    border: 1px solid #fde047 !important;
+    font-style: italic;
+}
+.pill-sans_suite,
+.pill-publie {
+    background: #f3f4f6;
+    color: #6b7280;
+    font-style: italic;
+}
+
+/* ==============================================================================
+   COMPTEUR "MOI AUSSI"
+   ============================================================================== */
+.moi-aussi-count {
+    display: inline-block;
+    background: rgba(255,255,255,0.3);
+    border-radius: 999px;
+    padding: 0 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: 4px;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* ==============================================================================
+   LIEN FACEBOOK (post transmis)
+   ============================================================================== */
+.fb-post-link {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 0.78rem;
+    color: #1877f2;
+    font-weight: 600;
+    text-decoration: none;
+}
+.fb-post-link:hover {
+    text-decoration: underline;
+}
+
+/* ==============================================================================
+   BOUTON WHATSAPP + LIGNE DE PARTAGE
+   ============================================================================== */
+.report-card-share-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.btn-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 11px;
+    background: #25d366;
+    color: #fff;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.15s;
+}
+.btn-whatsapp:hover {
+    background: #128c7e;
+}
+
+/* ==============================================================================
+   STATS — 3 METRIC BOXES
+   ============================================================================== */
+.stats-metrics-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.stats-metrics-row .metric-box {
+    flex: 1;
+    min-width: 80px;
+}

@@ -289,10 +289,12 @@ async function renderReportsList() {
     };
 
     const statusLabels = {
-        recu: "Reçu",
+        publie: "Signalement citoyen non confirmé",
+        recu: "Signalement citoyen non confirmé",
         confirme: "Confirmé",
         transmis: "Transmis",
-        resolu: "Résolu"
+        resolu: "Résolu",
+        sans_suite: "Sans suite (30 j)"
     };
 
     listContainer.innerHTML = filtered.map(report => {
@@ -300,6 +302,21 @@ async function renderReportsList() {
         const formattedDate = formatDate(report.incident_date);
         const timeDisplay = report.incident_time ? report.incident_time.substring(0, 5) : "10:30";
         const catIconLabel = catIcons[report.category] || "Signalement";
+
+        // Label statut
+        const statusLabel = statusLabels[report.status] || report.status;
+        const isNonConfirmed = (report.status === "recu" || report.status === "publie");
+
+        // Lien Facebook si transmis
+        const fbLink = (report.status === "transmis" && report.facebook_post_url)
+            ? `<a href="${escapeHtml(report.facebook_post_url)}" target="_blank" rel="noopener" class="fb-post-link">📘 Voir le post Facebook</a>`
+            : "";
+
+        // Bouton WhatsApp
+        const whatsappText = encodeURIComponent(
+            `🇸🇳 SignalSN — Fait signalé : ${report.fact_type} à ${report.establishment_name || report.location_name} le ${formattedDate}. Voir sur SignalSN : https://signalsn.vercel.app`
+        );
+        const whatsappBtn = `<a href="https://wa.me/?text=${whatsappText}" target="_blank" rel="noopener" class="btn-whatsapp">📲 Partager</a>`;
 
         return `
             <div class="report-card" id="card-${report.id}">
@@ -317,20 +334,25 @@ async function renderReportsList() {
                 
                 <div class="report-card-actions">
                     <div class="status-pills-wrap">
-                        <span class="pill-status pill-${report.status}">
-                            ${statusLabels[report.status] || report.status}
+                        <span class="pill-status pill-${report.status} ${isNonConfirmed ? 'pill-non-confirmed' : ''}">
+                            ${statusLabel}
                         </span>
                         ${report.immediate_danger ? `<span class="pill-status pill-danger">Danger immédiat</span>` : ''}
                     </div>
                     
                     <button class="btn-moi-aussi ${isMoiAussiActive}" onclick="handleMoiAussi('${report.id}')">
-                        Moi aussi j'ai vu
+                        👁 Moi aussi j'ai vu <span class="moi-aussi-count" id="count-${report.id}">${report.moi_aussi_count || 0}</span>
                     </button>
                 </div>
                 
-                <button class="link-signaler-contenu" onclick="openFlagModal('${report.id}')">
-                    Signaler ce contenu
-                </button>
+                ${fbLink}
+                
+                <div class="report-card-share-row">
+                    ${whatsappBtn}
+                    <button class="link-signaler-contenu" onclick="openFlagModal('${report.id}')">
+                        Signaler ce contenu
+                    </button>
+                </div>
             </div>
         `;
     }).join("");
@@ -344,6 +366,8 @@ function escapeHtml(str) {
 }
 
 // --- 5. INTERACTION "MOI AUSSI J'AI VU" ---
+const MOI_AUSSI_THRESHOLD = 2; // Paramétrable : nombre de "Moi aussi" pour confirmer
+
 async function handleMoiAussi(reportId) {
     const userVotes = JSON.parse(localStorage.getItem("signalsn_user_votes") || "{}");
     const key = `${reportId}_moi_aussi`;
@@ -358,19 +382,53 @@ async function handleMoiAussi(reportId) {
     
     if (supabaseClient) {
         try {
-            await supabaseClient.from("report_interactions").insert({
+            // Incrémenter le compteur et récupérer la nouvelle valeur
+            const { data: interaction } = await supabaseClient.from("report_interactions").insert({
                 report_id: reportId,
                 interaction: "moi_aussi",
                 device_fingerprint: getDeviceFingerprint()
-            });
+            }).select();
+
+            // Récupérer le rapport pour vérifier le seuil de confirmation
+            const { data: rep } = await supabaseClient
+                .from("reports")
+                .select("moi_aussi_count, status")
+                .eq("id", reportId)
+                .single();
+
+            if (rep) {
+                const newCount = (rep.moi_aussi_count || 0) + 1;
+                const updates = { moi_aussi_count: newCount };
+
+                // Auto-confirmation si seuil atteint et pas déjà confirmé
+                if (newCount >= MOI_AUSSI_THRESHOLD && (rep.status === "recu" || rep.status === "publie")) {
+                    updates.status = "confirme";
+                    updates.is_publicly_visible = true;
+                }
+
+                await supabaseClient.from("reports").update(updates).eq("id", reportId);
+
+                // Mise à jour visuelle du compteur
+                const countEl = document.getElementById(`count-${reportId}`);
+                if (countEl) countEl.textContent = newCount;
+            }
         } catch (e) {
             console.error(e);
         }
     } else {
+        // Mode démo : incrémenter localement et vérifier le seuil
         const rep = demoReports.find(r => r.id === reportId);
-        if (rep) rep.moi_aussi_count = (rep.moi_aussi_count || 0) + 1;
+        if (rep) {
+            rep.moi_aussi_count = (rep.moi_aussi_count || 0) + 1;
+            if (rep.moi_aussi_count >= MOI_AUSSI_THRESHOLD && (rep.status === "recu" || rep.status === "publie")) {
+                rep.status = "confirme";
+            }
+            const countEl = document.getElementById(`count-${reportId}`);
+            if (countEl) countEl.textContent = rep.moi_aussi_count;
+        }
     }
     
+    // Rafraîchir la liste pour refléter le nouveau statut
     renderReportsList();
 }
 
@@ -759,6 +817,9 @@ async function loadEstablishmentStats() {
     }
     
     totalEl.textContent = categoryReports.length;
+    const confirmedCount = categoryReports.filter(r => r.status === "confirme" || r.status === "transmis" || r.status === "resolu").length;
+    const confirmedEl = document.getElementById("stat-confirmed-count");
+    if (confirmedEl) confirmedEl.textContent = confirmedCount;
     const resolvedCount = categoryReports.filter(r => r.status === "resolu").length;
     const rate = categoryReports.length > 0 ? Math.round((resolvedCount / categoryReports.length) * 100) : 0;
     resolvedRateEl.textContent = rate + "%";
