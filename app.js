@@ -218,16 +218,35 @@ filterButtons.forEach(btn => {
 async function fetchReports() {
     if (supabaseClient) {
         try {
-            const { data, error } = await supabaseClient
+            let data = null;
+            let error = null;
+            
+            // Essai avec jointure establishments
+            const res = await supabaseClient
                 .from("reports")
                 .select("*, establishments(name)")
                 .eq("is_publicly_visible", true)
                 .order("created_at", { ascending: false });
             
+            data = res.data;
+            error = res.error;
+            
+            // Si erreur de relation, repli sur select("*") direct
+            if (error) {
+                console.warn("Erreur jointure establishments, fallback select direct:", error);
+                const simpleRes = await supabaseClient
+                    .from("reports")
+                    .select("*")
+                    .eq("is_publicly_visible", true)
+                    .order("created_at", { ascending: false });
+                data = simpleRes.data;
+                error = simpleRes.error;
+            }
+            
             if (!error && data) {
                 return data.map(r => ({
                     ...r,
-                    establishment_name: r.establishments ? r.establishments.name : r.location_name
+                    establishment_name: (r.establishments && r.establishments.name) ? r.establishments.name : r.location_name
                 }));
             }
         } catch (e) {
@@ -733,11 +752,9 @@ reportForm.addEventListener("submit", async (e) => {
     
     const newReport = {
         category,
-        // 'recu' est la valeur sûre dans l'enum existant — le trigger et l'app affichent "non confirmé"
         status: 'recu',
         establishment_id: establishmentId,
-        establishment_name: establishmentName,
-        location_name: locationName || "Lieu non précisé",
+        location_name: locationName || establishmentName || "Lieu non précisé",
         latitude: lat || 14.6937,
         longitude: lng || -17.4441,
         incident_date: document.getElementById("incident-date").value,
