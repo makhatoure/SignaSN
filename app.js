@@ -624,29 +624,77 @@ async function loadEstablishmentStats() {
     const resolvedRateEl = document.getElementById("stat-resolved-rate");
     
     const reports = await fetchReports();
-    totalEl.textContent = reports.length;
     
-    const resolvedCount = reports.filter(r => r.status === "resolu").length;
-    const rate = reports.length > 0 ? Math.round((resolvedCount / reports.length) * 100) : 0;
-    resolvedRateEl.textContent = rate + "%";
-    
-    let filteredList = liveEstablishments;
-    if (currentStatFilter === "hopital") {
-        filteredList = liveEstablishments.filter(e => e.category === "hopital");
+    let categoryReports = reports;
+    if (currentStatFilter === "insalubrite") {
+        categoryReports = reports.filter(r => r.category === "insalubrite");
+    } else if (currentStatFilter === "hopital") {
+        categoryReports = reports.filter(r => r.category === "sante");
     } else if (currentStatFilter === "mairie") {
-        filteredList = liveEstablishments.filter(e => e.category === "mairie");
+        categoryReports = reports.filter(r => r.category === "mairies_services");
     }
     
-    tableBody.innerHTML = filteredList.slice(0, 10).map(est => {
-        const estReports = reports.filter(r => r.establishment_name === est.name || (r.establishment_id && r.establishment_id === est.id));
-        const estCount = estReports.length;
-        const estResolved = estReports.filter(r => r.status === "resolu").length;
-        const estResolvedPct = estCount > 0 ? Math.round((estResolved / estCount) * 100) + "%" : "0%";
+    totalEl.textContent = categoryReports.length;
+    const resolvedCount = categoryReports.filter(r => r.status === "resolu").length;
+    const rate = categoryReports.length > 0 ? Math.round((resolvedCount / categoryReports.length) * 100) : 0;
+    resolvedRateEl.textContent = rate + "%";
+    
+    let rowsData = [];
+    
+    if (currentStatFilter === "insalubrite") {
+        const mapZones = {};
+        categoryReports.forEach(r => {
+            const loc = r.location_name || "Zone non spécifiée";
+            if (!mapZones[loc]) mapZones[loc] = { name: loc, count: 0, resolved: 0 };
+            mapZones[loc].count++;
+            if (r.status === "resolu") mapZones[loc].resolved++;
+        });
+        rowsData = Object.values(mapZones);
+    } else {
+        let filteredList = liveEstablishments;
+        if (currentStatFilter === "hopital") {
+            filteredList = liveEstablishments.filter(e => e.category === "hopital" || e.category === "centre_sante");
+        } else if (currentStatFilter === "mairie") {
+            filteredList = liveEstablishments.filter(e => e.category === "mairie" || e.category === "service_public");
+        }
         
+        rowsData = filteredList.map(est => {
+            const estReports = reports.filter(r => r.establishment_name === est.name || (r.establishment_id && r.establishment_id === est.id));
+            const estCount = estReports.length;
+            const estResolved = estReports.filter(r => r.status === "resolu").length;
+            return {
+                name: est.name,
+                count: estCount,
+                resolved: estResolved
+            };
+        });
+        
+        if (currentStatFilter === "all") {
+            const insalubreReports = reports.filter(r => r.category === "insalubrite");
+            const mapZones = {};
+            insalubreReports.forEach(r => {
+                const loc = r.location_name || "Zone non spécifiée";
+                if (!mapZones[loc]) mapZones[loc] = { name: loc, count: 0, resolved: 0 };
+                mapZones[loc].count++;
+                if (r.status === "resolu") mapZones[loc].resolved++;
+            });
+            rowsData = [...rowsData, ...Object.values(mapZones)];
+        }
+    }
+    
+    rowsData.sort((a, b) => b.count - a.count);
+    
+    if (rowsData.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 16px;">Aucun signalement dans cette catégorie.</td></tr>`;
+        return;
+    }
+
+    tableBody.innerHTML = rowsData.slice(0, 10).map(item => {
+        const estResolvedPct = item.count > 0 ? Math.round((item.resolved / item.count) * 100) + "%" : "0%";
         return `
             <tr>
-                <td>${escapeHtml(est.name)}</td>
-                <td>${estCount}</td>
+                <td>${escapeHtml(item.name)}</td>
+                <td>${item.count}</td>
                 <td>${estResolvedPct}</td>
             </tr>
         `;
