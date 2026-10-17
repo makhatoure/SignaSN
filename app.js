@@ -733,7 +733,8 @@ reportForm.addEventListener("submit", async (e) => {
     
     const newReport = {
         category,
-        status: (category === "insalubrite" || category === "securite") ? "confirme" : "recu",
+        // Toutes catégories publiées immédiatement (V1) — recoupement Santé/Mairies activé quand le volume grandit
+        status: 'publie',
         establishment_id: establishmentId,
         establishment_name: establishmentName,
         location_name: locationName || "Lieu non précisé",
@@ -747,7 +748,7 @@ reportForm.addEventListener("submit", async (e) => {
         photo_url: compressedPhotoData,
         reporter_role: document.querySelector('input[name="reporter_role"]:checked').value,
         device_fingerprint: getDeviceFingerprint(),
-        is_publicly_visible: (category === "insalubrite" || category === "voirie" || (category === "eau_electricite" && (immediateDanger || !factType.includes("Coupure"))) || category === "securite"),
+        is_publicly_visible: true,  // Publication immédiate pour toutes catégories en V1
         moi_aussi_count: 1,
         created_at: new Date().toISOString()
     };
