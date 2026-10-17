@@ -335,12 +335,22 @@ async function renderReportsList() {
         const whatsappText = encodeURIComponent(
             `🇸🇳 SignalSN — Fait signalé : ${report.fact_type} à ${report.establishment_name || report.location_name} le ${formattedDate}. Voir sur SignalSN : https://signalsn.vercel.app`
         );
-        const whatsappBtn = `<a href="https://wa.me/?text=${whatsappText}" target="_blank" rel="noopener" class="btn-whatsapp">📲 Partager</a>`;
+        const whatsappBtn = `<a href="https://wa.me/?text=${whatsappText}" target="_blank" rel="noopener" class="btn-whatsapp">Partager sur WhatsApp</a>`;
+
+        // Texte compteur "1 sur 2 pour confirmer"
+        const count = report.moi_aussi_count || 0;
+        let counterText = "";
+        if (report.status === "recu" || report.status === "publie") {
+            const currentStep = Math.min(count, 1);
+            counterText = ` (${currentStep} sur ${MOI_AUSSI_THRESHOLD} pour confirmer)`;
+        } else {
+            counterText = ` (${count})`;
+        }
 
         return `
             <div class="report-card" id="card-${report.id}">
                 <div class="report-card-title">
-                    [${escapeHtml(report.establishment_name || report.location_name)}]
+                    ${escapeHtml(report.establishment_name || report.location_name)}
                 </div>
                 
                 <div class="report-card-subtitle">
@@ -348,26 +358,28 @@ async function renderReportsList() {
                 </div>
                 
                 <div class="report-card-time">
-                    [${formattedDate}] · [${timeDisplay}]
+                    ${formattedDate} · ${timeDisplay}
                 </div>
                 
-                <div class="report-card-actions">
-                    <div class="status-pills-wrap">
-                        <span class="pill-status pill-${report.status} ${isNonConfirmed ? 'pill-non-confirmed' : ''}">
-                            ${statusLabel}
-                        </span>
-                        ${report.immediate_danger ? `<span class="pill-status pill-danger">Danger immédiat</span>` : ''}
-                    </div>
-                    
+                <!-- Ligne 1 : Pastilles de statut -->
+                <div class="card-status-line">
+                    <span class="pill-status pill-${report.status} ${isNonConfirmed ? 'pill-non-confirmed' : ''}">
+                        ${statusLabel}
+                    </span>
+                    ${report.immediate_danger ? `<span class="pill-status pill-danger">Danger immédiat</span>` : ''}
+                </div>
+                
+                <!-- Ligne 2 : Boutons d'action -->
+                <div class="card-action-line">
                     <button class="btn-moi-aussi ${isMoiAussiActive}" onclick="handleMoiAussi('${report.id}')">
-                        👁 Moi aussi j'ai vu <span class="moi-aussi-count" id="count-${report.id}">${report.moi_aussi_count || 0}</span>
+                        👁 Moi aussi j'ai vu <span class="moi-aussi-count" id="count-${report.id}">${counterText}</span>
                     </button>
+                    ${whatsappBtn}
                 </div>
                 
                 ${fbLink}
                 
                 <div class="report-card-share-row">
-                    ${whatsappBtn}
                     <button class="link-signaler-contenu" onclick="openFlagModal('${report.id}')">
                         Signaler ce contenu
                     </button>

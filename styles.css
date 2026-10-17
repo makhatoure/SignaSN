@@ -609,33 +609,55 @@ body {
 }
 
 /* ==============================================================================
-   BANDEAU URGENCE (Formulaire Signaler)
+   BANDEAU URGENCE (Formulaire Signaler & Footer)
    ============================================================================== */
 .urgency-alert-banner {
     background: #fff1f2;
     border: 1.5px solid #fca5a5;
     border-radius: var(--radius-md);
-    padding: 10px 14px;
+    padding: 12px 14px;
     margin-bottom: 14px;
-    font-size: 0.82rem;
+    font-size: 0.84rem;
     color: #991b1b;
-    line-height: 1.5;
 }
-.urgency-alert-banner strong {
+.urgency-pills-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+}
+.urgency-pill {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #f87171;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.15s ease;
+}
+.urgency-pill strong {
+    margin-left: 3px;
     color: #7f1d1d;
 }
-.urgency-numbers {
-    display: inline-block;
-    margin-top: 4px;
+.urgency-pill:hover {
+    background: #fca5a5;
 }
-.urgency-numbers a {
-    color: #b91c1c;
+.urgency-pill.mini {
+    padding: 4px 10px;
+    font-size: 0.74rem;
+}
+.footer-pills {
+    justify-content: center;
+    margin-top: 5px;
+}
+.urgency-footer-title {
     font-weight: 700;
-    text-decoration: none;
-    white-space: nowrap;
-}
-.urgency-numbers a:hover {
-    text-decoration: underline;
+    display: block;
+    margin-bottom: 2px;
 }
 
 /* ==============================================================================
@@ -647,17 +669,27 @@ body {
     color: #b91c1c;
     background: #fff1f2;
     border-radius: var(--radius-sm);
-    padding: 7px 12px;
-    margin-bottom: 10px;
+    padding: 9px 12px;
+    margin-bottom: 12px;
     border: 1px solid #fca5a5;
 }
-.urgency-footer a {
-    color: #7f1d1d;
-    font-weight: 700;
-    text-decoration: none;
+
+/* ==============================================================================
+   LIGNES EMPILÉES SUR LA CARTE (Ligne 1 Pastilles, Ligne 2 Actions)
+   ============================================================================== */
+.card-status-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
 }
-.urgency-footer a:hover {
-    text-decoration: underline;
+
+.card-action-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
 }
 
 /* ==============================================================================
