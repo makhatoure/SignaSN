@@ -733,8 +733,8 @@ reportForm.addEventListener("submit", async (e) => {
     
     const newReport = {
         category,
-        // Toutes catégories publiées immédiatement (V1) — recoupement Santé/Mairies activé quand le volume grandit
-        status: 'publie',
+        // 'recu' est la valeur sûre dans l'enum existant — le trigger et l'app affichent "non confirmé"
+        status: 'recu',
         establishment_id: establishmentId,
         establishment_name: establishmentName,
         location_name: locationName || "Lieu non précisé",
@@ -748,16 +748,27 @@ reportForm.addEventListener("submit", async (e) => {
         photo_url: compressedPhotoData,
         reporter_role: document.querySelector('input[name="reporter_role"]:checked').value,
         device_fingerprint: getDeviceFingerprint(),
-        is_publicly_visible: true,  // Publication immédiate pour toutes catégories en V1
+        is_publicly_visible: true,
         moi_aussi_count: 1,
         created_at: new Date().toISOString()
     };
     
     if (supabaseClient) {
         try {
-            await supabaseClient.from("reports").insert([newReport]);
+            const { error } = await supabaseClient.from("reports").insert([newReport]);
+            if (error) {
+                console.error("Erreur Supabase:", error);
+                alert("❌ Erreur lors de l'envoi : " + error.message + "\nVeuillez réessayer ou contacter l'équipe SignalSN.");
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Envoyer le signalement";
+                return;
+            }
         } catch (err) {
-            console.error(err);
+            console.error("Erreur réseau:", err);
+            alert("❌ Erreur réseau. Vérifiez votre connexion et réessayez.");
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Envoyer le signalement";
+            return;
         }
     } else {
         demoReports.unshift({ id: "rep-" + Date.now(), ...newReport });
