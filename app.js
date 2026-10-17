@@ -506,11 +506,11 @@ function renderDynamicCategoryFields(category) {
         locationInput.required = true;
         
         if (category === "voirie") {
-            locationInput.placeholder = "Axe routier ou repère (Ex: VDN Échangeur Foire, RN1 Rufisque)...";
+            locationInput.placeholder = "Lieu précis ou axe routier (Ex: VDN Échangeur Foire, RN1 Rufisque)...";
         } else if (category === "eau_electricite") {
-            locationInput.placeholder = "Quartier et rue (Ex: Médina Rue 22, Parcelles Unité 15)...";
+            locationInput.placeholder = "Lieu précis (Quartier, rue, borne fontaine)...";
         } else if (category === "insalubrite") {
-            locationInput.placeholder = "Lieu précis (Ex: Croisement Case Bi, près de l'école)...";
+            locationInput.placeholder = "Lieu précis (Croisement, rue, près de l'école)...";
         }
     } else {
         establishmentSelectWrap.style.display = "block";
