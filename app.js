@@ -267,7 +267,7 @@ async function renderReportsList() {
         const catTitle = catNames[currentCategoryFilter] || "cette catégorie";
         listContainer.innerHTML = `
             <div style="text-align: center; padding: 35px 20px; border: 1px dashed var(--border-color); border-radius: var(--radius-md); margin-bottom: 16px;">
-                <p style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">Aucun fait signalé dans ${escapeHtml(catTitle)}</p>
+                <p style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">Aucun fait publié pour l'instant.</p>
                 <p style="font-size: 0.8rem; color: var(--text-muted); margin: 6px 0 14px 0;">Soyez le premier à documenter un fait factuel.</p>
                 <button type="button" class="btn-primary-submit" onclick="goToReportWithCategory('${currentCategoryFilter}')" style="max-width: 240px; margin: 0 auto; padding: 9px 14px; font-size: 0.85rem;">
                     + Signaler un fait
