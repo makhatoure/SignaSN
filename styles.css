@@ -675,21 +675,98 @@ body {
 }
 
 /* ==============================================================================
-   LIGNES EMPILÉES SUR LA CARTE (Ligne 1 Pastilles, Ligne 2 Actions)
+   ALIGNEMENT STRICT SUR 2 LIGNES PAR CARTE
+   Ligne 1 : Statut à gauche, "Moi aussi j'ai vu" à droite
+   Ligne 2 : Danger immédiat à gauche, "Partager sur WhatsApp" à droite
+   Boutons : Même largeur, min-height 44px
    ============================================================================== */
-.card-status-line {
+.card-dual-grid {
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 10px;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+    margin-bottom: 6px;
 }
 
-.card-action-line {
+.dual-row {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    gap: 12px;
+    min-height: 44px;
+}
+
+.dual-col-left {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.dual-col-right {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Boutons d'action unifiés : même taille et min-height 44px tactile */
+.card-action-btn {
+    width: 175px;
+    min-height: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    box-sizing: border-box;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-moi-aussi {
+    background: white;
+    border: 1.5px solid var(--primary-green);
+    color: var(--primary-green);
+}
+.btn-moi-aussi:hover {
+    background: var(--primary-green-light);
+}
+.btn-moi-aussi.active {
+    background: var(--primary-green);
+    color: white;
+}
+
+.btn-whatsapp {
+    background: #25d366;
+    color: white;
+    border: 1.5px solid #20ba5a;
+}
+.btn-whatsapp:hover {
+    background: #1eb757;
+}
+
+/* Bloc Danger immédiat + conseil secours */
+.danger-immediate-block {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.danger-call-notice {
+    font-size: 0.72rem;
+    color: #b91c1c;
+    font-weight: 500;
+    line-height: 1.25;
+}
+
+@media (max-width: 440px) {
+    .card-action-btn {
+        width: 155px;
+        font-size: 0.75rem;
+    }
 }
 
 /* ==============================================================================

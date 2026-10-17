@@ -337,14 +337,18 @@ async function renderReportsList() {
         );
         const whatsappBtn = `<a href="https://wa.me/?text=${whatsappText}" target="_blank" rel="noopener" class="btn-whatsapp">Partager sur WhatsApp</a>`;
 
-        // Texte compteur "1 sur 2 pour confirmer"
-        const count = report.moi_aussi_count || 0;
-        let counterText = "";
+        // Label statut court et explicite
+        let displayStatusLabel = "Confirmé";
         if (report.status === "recu" || report.status === "publie") {
+            const count = report.moi_aussi_count || 1;
             const currentStep = Math.min(count, 1);
-            counterText = ` (${currentStep} sur ${MOI_AUSSI_THRESHOLD} pour confirmer)`;
-        } else {
-            counterText = ` (${count})`;
+            displayStatusLabel = `Non confirmé · ${currentStep} sur ${MOI_AUSSI_THRESHOLD}`;
+        } else if (report.status === "transmis") {
+            displayStatusLabel = "Transmis";
+        } else if (report.status === "resolu") {
+            displayStatusLabel = "Résolu";
+        } else if (report.status === "sans_suite") {
+            displayStatusLabel = "Sans suite";
         }
 
         return `
@@ -361,20 +365,38 @@ async function renderReportsList() {
                     ${formattedDate} · ${timeDisplay}
                 </div>
                 
-                <!-- Ligne 1 : Pastilles de statut -->
-                <div class="card-status-line">
-                    <span class="pill-status pill-${report.status} ${isNonConfirmed ? 'pill-non-confirmed' : ''}">
-                        ${statusLabel}
-                    </span>
-                    ${report.immediate_danger ? `<span class="pill-status pill-danger">Danger immédiat</span>` : ''}
-                </div>
-                
-                <!-- Ligne 2 : Boutons d'action -->
-                <div class="card-action-line">
-                    <button class="btn-moi-aussi ${isMoiAussiActive}" onclick="handleMoiAussi('${report.id}')">
-                        👁 Moi aussi j'ai vu <span class="moi-aussi-count" id="count-${report.id}">${counterText}</span>
-                    </button>
-                    ${whatsappBtn}
+                <!-- Alignement 2 Lignes -->
+                <div class="card-dual-grid">
+                    <!-- Ligne 1 : Statut à gauche | Bouton Moi aussi à droite -->
+                    <div class="dual-row dual-row-1">
+                        <div class="dual-col-left">
+                            <span class="pill-status pill-${report.status} ${isNonConfirmed ? 'pill-non-confirmed' : ''}">
+                                ${displayStatusLabel}
+                            </span>
+                        </div>
+                        <div class="dual-col-right">
+                            <button class="card-action-btn btn-moi-aussi ${isMoiAussiActive}" onclick="handleMoiAussi('${report.id}')">
+                                Moi aussi j'ai vu
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Ligne 2 : Danger immédiat (+ conseil secours) à gauche | Bouton WhatsApp à droite -->
+                    <div class="dual-row dual-row-2">
+                        <div class="dual-col-left">
+                            ${report.immediate_danger ? `
+                                <div class="danger-immediate-block">
+                                    <span class="pill-status pill-danger">Danger immédiat</span>
+                                    <span class="danger-call-notice">Appelez d'abord les secours si vous êtes sur place</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="dual-col-right">
+                            <a href="https://wa.me/?text=${whatsappText}" target="_blank" rel="noopener" class="card-action-btn btn-whatsapp">
+                                Partager sur WhatsApp
+                            </a>
+                        </div>
+                    </div>
                 </div>
                 
                 ${fbLink}
