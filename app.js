@@ -174,7 +174,7 @@ navButtons.forEach(btn => {
     });
 });
 
-// Synchronisation automatique de la date et de l'heure du téléphone
+// Synchronisation automatique de la date et de l'heure réelles du téléphone
 function syncCurrentDateTime() {
     const now = new Date();
     const y = now.getFullYear();
@@ -186,7 +186,7 @@ function syncCurrentDateTime() {
     const dateInput = document.getElementById("incident-date");
     const timeInput = document.getElementById("incident-time");
     
-    if (dateInput) dateInput.value = `${y}-${m}-${d}`;
+    if (dateInput && !dateInput.value) dateInput.value = `${d}/${m}/${y}`;
     if (timeInput && !timeInput.value) timeInput.value = `${hh}:${mm}`;
 }
 
@@ -367,10 +367,10 @@ async function renderReportsList() {
                     </div>
                     <div class="card-title-block">
                         <div class="report-card-title">
-                            [${escapeHtml(report.establishment_name || report.location_name)}]
+                            ${escapeHtml(report.establishment_name || report.location_name)}
                         </div>
                         <div class="report-card-subtitle-compact">
-                            ${currentCat.name} · ${escapeHtml(report.fact_type)} · [${formattedDate}] · [${timeDisplay}]
+                            ${currentCat.name} · ${escapeHtml(report.fact_type)} · ${formattedDate}${timeDisplay ? ` · ${timeDisplay}` : ''}
                         </div>
                     </div>
                 </div>
@@ -1021,7 +1021,7 @@ async function loadEstablishmentStats() {
                 <div class="stat-card-header">
                     <div class="stat-card-title-wrap">
                         <div class="stat-cat-icon">${item.icon}</div>
-                        <div class="stat-est-name">[${escapeHtml(item.name)}]</div>
+                        <div class="stat-est-name">${escapeHtml(item.name)}</div>
                     </div>
                     <div class="stat-est-count">
                         <strong>${item.count}</strong>
@@ -1030,8 +1030,8 @@ async function loadEstablishmentStats() {
                 </div>
                 
                 <div class="stat-card-subinfo">
-                    <span>Confirmés [${item.confirmed}]</span>
-                    <span>Résolus [${estResolvedPct}%]</span>
+                    <span>Confirmés : ${item.confirmed}</span>
+                    <span>Résolus : ${estResolvedPct}%</span>
                 </div>
                 
                 <!-- Double barre bicolore verte -->
