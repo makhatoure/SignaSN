@@ -19,15 +19,18 @@
 </head>
 <body>
 
-    <!-- En-tête vert institutionnel -->
+    <!-- En-tête vert institutionnel conforme maquette -->
     <header class="app-header">
         <div class="header-inner">
             <div class="header-brand-wrap">
                 <div class="header-logo-badge">SN</div>
                 <div class="header-text-block">
                     <h1>SignalSN</h1>
-                    <p>Faits citoyens documentés · Initiative citoyenne indépendante</p>
+                    <p>Faits citoyens documentés</p>
                 </div>
+            </div>
+            <div class="header-initiative-badge">
+                <span>Initiative citoyenne<br>indépendante</span>
             </div>
         </div>
     </header>
@@ -92,55 +95,59 @@
         <!-- ====================================================================
              ÉCRAN 2 : SIGNALER UN FAIT
              ==================================================================== -->
+        <!-- ====================================================================
+             ÉCRAN 2 : SIGNALER UN FAIT (CONFORME MAQUETTE IMAGE 2)
+             ==================================================================== -->
         <section id="view-new" class="view-section">
             <h2 class="view-title">Signaler un fait</h2>
-            <p class="view-subtitle">Nous publions le lieu et le fait constaté, jamais votre identité.</p>
-
-            <!-- Alerte urgence -->
-            <div class="urgency-alert-banner">
-                <div style="font-weight: 700; margin-bottom: 6px;">🚨 Danger immédiat ? Appelez d'abord les secours :</div>
-                <div class="urgency-pills-row">
-                    <a href="tel:18" class="urgency-pill">🚒 Pompiers : <strong>18</strong></a>
-                    <a href="tel:15" class="urgency-pill">🏥 SAMU : <strong>15 ou 1515</strong></a>
-                    <a href="tel:17" class="urgency-pill">🚔 Police : <strong>17</strong></a>
-                </div>
-            </div>
+            <p class="view-subtitle">Décrivez ce que vous avez constaté, sans nom de personne.</p>
 
             <form id="report-form">
-                <!-- Catégorie * -->
+                <!-- Grille de tuiles pour Catégorie -->
                 <div class="field-group">
-                    <label class="field-label" for="category-select">Catégorie *</label>
-                    <select id="category-select" class="field-select" required>
-                        <option value="">Choisir une catégorie</option>
-                        <option value="voirie">🚧 Routes et voirie</option>
-                        <option value="eau_electricite">💧 Eau et électricité</option>
-                        <option value="insalubrite">🧹 Insalubrité</option>
-                        <option value="sante">🏥 Santé</option>
-                        <option value="mairies_services">🏛️ Mairies et services publics</option>
-                        <option value="securite">🛡️ Sécurité</option>
-                    </select>
+                    <label class="field-label">Catégorie</label>
+                    <input type="hidden" id="category-select" value="voirie" required>
+                    <div class="category-tiles-grid">
+                        <button type="button" class="cat-tile active" data-cat="voirie">
+                            <span class="tile-icon">🚧</span>
+                            <span class="tile-label">Voirie</span>
+                        </button>
+                        <button type="button" class="cat-tile" data-cat="eau_electricite">
+                            <span class="tile-icon">💧</span>
+                            <span class="tile-label">Eau et électricité</span>
+                        </button>
+                        <button type="button" class="cat-tile" data-cat="insalubrite">
+                            <span class="tile-icon">🧹</span>
+                            <span class="tile-label">Insalubrité</span>
+                        </button>
+                        <button type="button" class="cat-tile" data-cat="sante">
+                            <span class="tile-icon">🏥</span>
+                            <span class="tile-label">Santé</span>
+                        </button>
+                        <button type="button" class="cat-tile" data-cat="mairies_services">
+                            <span class="tile-icon">🏛️</span>
+                            <span class="tile-label">Mairies</span>
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Établissement ou lieu * -->
+                <!-- Lieu ou repère + Bouton Ma position -->
                 <div class="field-group">
-                    <label class="field-label" id="establishment-or-location-label" for="establishment-select">Établissement ou lieu *</label>
+                    <label class="field-label" id="establishment-or-location-label" for="location-input">Lieu ou repère</label>
                     
-                    <div id="establishment-select-wrap">
+                    <div id="establishment-select-wrap" style="display: none; margin-bottom: 8px;">
                         <select id="establishment-select" class="field-select">
-                            <option value="">Choisir dans la liste</option>
+                            <option value="">Choisir un établissement</option>
                         </select>
                     </div>
 
-                    <div id="free-location-wrap" style="display: none; margin-top: 6px;">
-                        <input type="text" id="location-input" class="field-input" placeholder="Lieu précis (croisement, rue, quartier, commune)..." maxlength="120">
-                    </div>
-
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <button type="button" id="btn-gps" class="btn-use-location">
-                            📍 Utiliser ma position
+                    <div class="location-input-row">
+                        <input type="text" id="location-input" class="field-input" placeholder="Ex. carrefour, entrée de l'hôpital..." maxlength="120" required>
+                        <button type="button" id="btn-gps" class="btn-location-gps">
+                            📍 Ma position
                         </button>
-                        <span id="gps-status" style="font-size: 0.72rem; color: var(--text-muted);"></span>
                     </div>
+                    <span id="gps-status" style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 4px;"></span>
                     <input type="hidden" id="lat-input">
                     <input type="hidden" id="lng-input">
                 </div>
@@ -148,54 +155,57 @@
                 <!-- Champs dynamiques contextuels (Services, Types de faits) -->
                 <div id="dynamic-category-fields"></div>
 
-                <!-- Date du fait * et Heure -->
+                <!-- Date et Heure côte à côte -->
                 <div class="field-group row-2-col">
                     <div>
-                        <label class="field-label" for="incident-date">Date du fait *</label>
-                        <input type="date" id="incident-date" class="field-input" required>
+                        <label class="field-label" for="incident-date">Date</label>
+                        <input type="text" id="incident-date" class="field-input" placeholder="JJ/MM/AAAA" required>
                     </div>
                     <div>
                         <label class="field-label" for="incident-time">Heure</label>
-                        <input type="time" id="incident-time" class="field-input">
+                        <input type="text" id="incident-time" class="field-input" placeholder="HH:MM">
                     </div>
                 </div>
 
-                <!-- Description factuelle * -->
+                <!-- Description factuelle -->
                 <div class="field-group">
-                    <label class="field-label" for="description-input">Description factuelle *</label>
-                    <textarea id="description-input" class="field-textarea" rows="4" maxlength="500" placeholder="Décrivez l'état des lieux, les horaires ou le problème constaté. Pas de noms de personnes." required></textarea>
+                    <label class="field-label" for="description-input">Description factuelle</label>
+                    <textarea id="description-input" class="field-textarea" rows="3" maxlength="500" placeholder="L'état des lieux, les horaires, le problème constaté. Pas de noms." required></textarea>
                     <div class="char-counter-right"><span id="char-count">0</span> / 500</div>
                     <div id="filter-warning" style="display: none; background: #fff1f2; color: #be123c; padding: 6px 10px; border-radius: 4px; font-size: 0.75rem; margin-top: 4px;">
                         ⚠️ Rappel : Veuillez ne mentionner aucun nom propre de personne.
                     </div>
                 </div>
 
-                <!-- Photo du lieu (facultatif) -->
+                <!-- Votre rôle (Segmenté) -->
                 <div class="field-group">
-                    <label class="field-label" id="photo-field-label">Photo du lieu (facultatif)</label>
-                    <input type="file" id="photo-input" accept="image/*" style="display: none;">
-                    <button type="button" class="btn-add-photo" id="btn-trigger-photo">
-                        📷 Ajouter une photo
-                    </button>
-                    <div id="photo-preview-container" style="display: none; margin-top: 8px;">
-                        <img id="photo-preview" src="" alt="Aperçu" style="max-height: 160px; border-radius: 6px; border: 1px solid var(--border-color);">
-                        <div id="photo-compression-info" style="font-size: 0.72rem; color: var(--primary-green); font-weight: 600; margin-top: 2px;"></div>
+                    <label class="field-label">Votre rôle</label>
+                    <input type="hidden" id="reporter-role-input" value="present">
+                    <div class="segmented-role-row">
+                        <button type="button" class="role-segment-btn active" data-role="present">Présent</button>
+                        <button type="button" class="role-segment-btn" data-role="victime">Concerné</button>
+                        <button type="button" class="role-segment-btn" data-role="rapporte">Rapporté</button>
                     </div>
-                    <p class="field-disclaimer">Photographiez uniquement le problème matériel. Pas de visages ni de plaques.</p>
                 </div>
 
-                <!-- Votre rôle * -->
-                <div class="field-group">
-                    <label class="field-label">Votre rôle *</label>
-                    <div class="radio-options-list">
-                        <label class="radio-item">
-                            <input type="radio" name="reporter_role" value="present" checked> J'étais présent
-                        </label>
-                        <label class="radio-item">
-                            <input type="radio" name="reporter_role" value="victime"> Je suis directement concerné
-                        </label>
-                        <label class="radio-item">
-                            <input type="radio" name="reporter_role" value="rapporte"> On me l'a rapporté
+                <!-- Ligne Photo du lieu + Toggle Danger immédiat -->
+                <div class="field-group media-danger-row">
+                    <div class="media-photo-col">
+                        <input type="file" id="photo-input" accept="image/*" style="display: none;">
+                        <button type="button" class="btn-dashed-photo" id="btn-trigger-photo">
+                            📷 Photo du lieu
+                        </button>
+                        <div id="photo-preview-container" style="display: none; margin-top: 6px;">
+                            <img id="photo-preview" src="" alt="Aperçu" style="max-height: 80px; border-radius: 4px; border: 1px solid var(--border-color);">
+                            <div id="photo-compression-info" style="font-size: 0.7rem; color: var(--primary-green); font-weight: 600;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="toggle-danger-col">
+                        <label class="toggle-danger-box">
+                            <input type="checkbox" id="immediate-danger-checkbox">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label-text">Danger immédiat</span>
                         </label>
                     </div>
                 </div>
@@ -206,7 +216,7 @@
                 </button>
 
                 <p class="terms-note">
-                    En envoyant, vous acceptez la <a onclick="openInfoModal()">Charte</a>.
+                    Pas de visages ni de plaques sur les photos. Vous acceptez la <a onclick="openInfoModal()">Charte</a>.
                 </p>
             </form>
         </section>
@@ -229,37 +239,29 @@
 
             <div class="stats-metrics-row">
                 <div class="metric-box">
-                    <div class="metric-val" id="stat-total-reports">0</div>
-                    <div class="metric-label">Faits signalés</div>
+                    <div class="metric-icon-badge">📋</div>
+                    <div class="metric-val" id="stat-total-reports">[n]</div>
+                    <div class="metric-label">Faits documentés</div>
                 </div>
                 <div class="metric-box">
-                    <div class="metric-val" id="stat-confirmed-count">0</div>
-                    <div class="metric-label">Confirmés</div>
+                    <div class="metric-icon-badge">✅</div>
+                    <div class="metric-val" id="stat-confirmed-count">[n]</div>
+                    <div class="metric-label">Faits confirmés</div>
                 </div>
                 <div class="metric-box">
-                    <div class="metric-val" id="stat-resolved-rate">0%</div>
+                    <div class="metric-icon-badge">🔧</div>
+                    <div class="metric-val" id="stat-resolved-rate">[%]</div>
                     <div class="metric-label">Résolus</div>
                 </div>
             </div>
 
-            <!-- Tableau d'établissements -->
-            <div class="stats-table-wrap">
-                <table class="stats-table">
-                    <thead>
-                        <tr>
-                            <th>Établissement</th>
-                            <th>Signalements</th>
-                            <th>Résolus</th>
-                        </tr>
-                    </thead>
-                    <tbody id="establishments-table-body">
-                        <!-- Rempli par app.js -->
-                    </tbody>
-                </table>
+            <!-- Liste des cartes d'établissements (conforme Image 3) -->
+            <div id="establishments-cards-container" class="establishments-cards-list">
+                <!-- Rempli dynamiquement par app.js -->
             </div>
 
             <p class="stats-disclaimer">
-                Les chiffres incluent les signalements reçus, y compris ceux en attente de recoupement. Ils décrivent des faits signalés par des citoyens, pas un jugement sur les personnes.
+                Chiffres issus des signalements reçus : ils ne reflètent pas toute la réalité et ne constituent pas un classement des établissements.
             </p>
         </section>
 

@@ -507,21 +507,39 @@ async function handleMoiAussi(reportId) {
     renderReportsList();
 }
 
-// --- 6. GESTION DU FORMULAIRE "SIGNALER UN FAIT" (IMAGE 2) ---
+// --- 6. GESTION DU FORMULAIRE "SIGNALER UN FAIT" (CONFORME IMAGE 2) ---
 const categorySelect = document.getElementById("category-select");
 const establishmentSelect = document.getElementById("establishment-select");
 const establishmentSelectWrap = document.getElementById("establishment-select-wrap");
-const freeLocationWrap = document.getElementById("free-location-wrap");
 const locationInput = document.getElementById("location-input");
 const dynamicFieldsContainer = document.getElementById("dynamic-category-fields");
 const btnTriggerPhoto = document.getElementById("btn-trigger-photo");
 const photoInput = document.getElementById("photo-input");
+const catTiles = document.querySelectorAll(".cat-tile");
+const roleSegmentBtns = document.querySelectorAll(".role-segment-btn");
+const roleInput = document.getElementById("reporter-role-input");
 
 btnTriggerPhoto.addEventListener("click", () => photoInput.click());
 
-categorySelect.addEventListener("change", (e) => {
-    const category = e.target.value;
-    renderDynamicCategoryFields(category);
+// Gestion des tuiles de catégorie
+catTiles.forEach(tile => {
+    tile.addEventListener("click", () => {
+        catTiles.forEach(t => t.classList.remove("active"));
+        tile.classList.add("active");
+        const selectedCat = tile.getAttribute("data-cat");
+        if (categorySelect) categorySelect.value = selectedCat;
+        renderDynamicCategoryFields(selectedCat);
+    });
+});
+
+// Gestion des segments de rôle
+roleSegmentBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+        roleSegmentBtns.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        const role = btn.getAttribute("data-role");
+        if (roleInput) roleInput.value = role;
+    });
 });
 
 function populateEstablishmentDropdown(filterCat = null) {
@@ -534,7 +552,7 @@ function populateEstablishmentDropdown(filterCat = null) {
         list = liveEstablishments.filter(e => e.category === "mairie" || e.category === "service_public");
     }
     
-    establishmentSelect.innerHTML = `<option value="">Choisir dans la liste</option>` + list.map(e => `
+    establishmentSelect.innerHTML = `<option value="">Choisir un établissement</option>` + list.map(e => `
         <option value="${e.id}" data-lat="${e.latitude}" data-lng="${e.longitude}" data-name="${e.name}">
             ${e.name} (${e.commune})
         </option>
@@ -806,6 +824,22 @@ reportForm.addEventListener("submit", async (e) => {
     const dangerCheckbox = document.getElementById("immediate-danger-checkbox");
     const immediateDanger = dangerCheckbox ? dangerCheckbox.checked : false;
     
+    let roleVal = "present";
+    const roleHidden = document.getElementById("reporter-role-input");
+    if (roleHidden) {
+        roleVal = roleHidden.value;
+    } else {
+        const checkedRole = document.querySelector('input[name="reporter_role"]:checked');
+        if (checkedRole) roleVal = checkedRole.value;
+    }
+
+    let dateVal = document.getElementById("incident-date").value;
+    // Conversion si format JJ/MM/AAAA vers AAAA-MM-JJ pour Supabase
+    if (dateVal && dateVal.includes("/")) {
+        const dparts = dateVal.split("/");
+        if (dparts.length === 3) dateVal = `${dparts[2]}-${dparts[1]}-${dparts[0]}`;
+    }
+    
     const newReport = {
         category,
         status: 'recu',
@@ -813,13 +847,13 @@ reportForm.addEventListener("submit", async (e) => {
         location_name: locationName || establishmentName || "Lieu non précisé",
         latitude: lat || 14.6937,
         longitude: lng || -17.4441,
-        incident_date: document.getElementById("incident-date").value,
+        incident_date: dateVal || new Date().toISOString().split("T")[0],
         incident_time: document.getElementById("incident-time").value || null,
         fact_type: factType,
         immediate_danger: immediateDanger,
         factual_description: descInput.value,
         photo_url: compressedPhotoData,
-        reporter_role: document.querySelector('input[name="reporter_role"]:checked').value,
+        reporter_role: roleVal,
         device_fingerprint: getDeviceFingerprint(),
         is_publicly_visible: true,
         moi_aussi_count: 1,
@@ -882,8 +916,9 @@ statFilterButtons.forEach(btn => {
 });
 
 async function loadEstablishmentStats() {
-    const tableBody = document.getElementById("establishments-table-body");
+    const cardsContainer = document.getElementById("establishments-cards-container");
     const totalEl = document.getElementById("stat-total-reports");
+    const confirmedEl = document.getElementById("stat-confirmed-count");
     const resolvedRateEl = document.getElementById("stat-resolved-rate");
     
     const reports = await fetchReports();
@@ -903,7 +938,6 @@ async function loadEstablishmentStats() {
     
     totalEl.textContent = categoryReports.length;
     const confirmedCount = categoryReports.filter(r => r.status === "confirme" || r.status === "transmis" || r.status === "resolu").length;
-    const confirmedEl = document.getElementById("stat-confirmed-count");
     if (confirmedEl) confirmedEl.textContent = confirmedCount;
     const resolvedCount = categoryReports.filter(r => r.status === "resolu").length;
     const rate = categoryReports.length > 0 ? Math.round((resolvedCount / categoryReports.length) * 100) : 0;
@@ -911,13 +945,24 @@ async function loadEstablishmentStats() {
     
     let rowsData = [];
     
+    const iconByCat = {
+        sante: "🏥",
+        hopital: "🏥",
+        mairie: "🏛️",
+        mairies_services: "🏛️",
+        voirie: "🚧",
+        eau_electricite: "💧",
+        insalubrite: "🧹"
+    };
+
     // Agrégation par lieu / commune pour insalubrité, voirie ou eau/électricité
     if (currentStatFilter === "insalubrite" || currentStatFilter === "voirie" || currentStatFilter === "eau_electricite") {
         const mapZones = {};
         categoryReports.forEach(r => {
             const loc = r.location_name || "Zone non spécifiée";
-            if (!mapZones[loc]) mapZones[loc] = { name: loc, count: 0, resolved: 0 };
+            if (!mapZones[loc]) mapZones[loc] = { name: loc, count: 0, confirmed: 0, resolved: 0, icon: iconByCat[r.category] || "📍" };
             mapZones[loc].count++;
+            if (r.status === "confirme" || r.status === "transmis" || r.status === "resolu") mapZones[loc].confirmed++;
             if (r.status === "resolu") mapZones[loc].resolved++;
         });
         rowsData = Object.values(mapZones);
@@ -932,11 +977,15 @@ async function loadEstablishmentStats() {
         rowsData = filteredList.map(est => {
             const estReports = reports.filter(r => r.establishment_name === est.name || (r.establishment_id && r.establishment_id === est.id));
             const estCount = estReports.length;
+            const estConfirmed = estReports.filter(r => r.status === "confirme" || r.status === "transmis" || r.status === "resolu").length;
             const estResolved = estReports.filter(r => r.status === "resolu").length;
+            const icon = est.category === "mairie" ? "🏛️" : (est.category === "hopital" ? "🏥" : "📍");
             return {
                 name: est.name,
                 count: estCount,
-                resolved: estResolved
+                confirmed: estConfirmed,
+                resolved: estResolved,
+                icon: icon
             };
         });
         
@@ -945,8 +994,9 @@ async function loadEstablishmentStats() {
             const mapZones = {};
             nonEstReports.forEach(r => {
                 const loc = r.location_name || "Zone non spécifiée";
-                if (!mapZones[loc]) mapZones[loc] = { name: loc, count: 0, resolved: 0 };
+                if (!mapZones[loc]) mapZones[loc] = { name: loc, count: 0, confirmed: 0, resolved: 0, icon: iconByCat[r.category] || "📍" };
                 mapZones[loc].count++;
+                if (r.status === "confirme" || r.status === "transmis" || r.status === "resolu") mapZones[loc].confirmed++;
                 if (r.status === "resolu") mapZones[loc].resolved++;
             });
             rowsData = [...rowsData, ...Object.values(mapZones)];
@@ -955,19 +1005,41 @@ async function loadEstablishmentStats() {
     
     rowsData.sort((a, b) => b.count - a.count);
     
+    if (!cardsContainer) return;
+
     if (rowsData.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 16px;">Aucun signalement dans cette catégorie.</td></tr>`;
+        cardsContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 25px; border: 1px dashed var(--border-color); border-radius: var(--radius-md);">Aucun signalement dans cette catégorie.</div>`;
         return;
     }
 
-    tableBody.innerHTML = rowsData.slice(0, 10).map(item => {
-        const estResolvedPct = item.count > 0 ? Math.round((item.resolved / item.count) * 100) + "%" : "0%";
+    cardsContainer.innerHTML = rowsData.slice(0, 10).map(item => {
+        const estResolvedPct = item.count > 0 ? Math.round((item.resolved / item.count) * 100) : 0;
+        const confirmedPct = item.count > 0 ? Math.min(100, Math.round((item.confirmed / item.count) * 100)) : 0;
+        
         return `
-            <tr>
-                <td>${escapeHtml(item.name)}</td>
-                <td>${item.count}</td>
-                <td>${estResolvedPct}</td>
-            </tr>
+            <div class="stat-est-card">
+                <div class="stat-card-header">
+                    <div class="stat-card-title-wrap">
+                        <div class="stat-cat-icon">${item.icon}</div>
+                        <div class="stat-est-name">[${escapeHtml(item.name)}]</div>
+                    </div>
+                    <div class="stat-est-count">
+                        <strong>${item.count}</strong>
+                        <span>signalements</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card-subinfo">
+                    <span>Confirmés [${item.confirmed}]</span>
+                    <span>Résolus [${estResolvedPct}%]</span>
+                </div>
+                
+                <!-- Double barre bicolore verte -->
+                <div class="stat-dual-progress-track">
+                    <div class="stat-progress-bar-confirmed" style="width: ${confirmedPct}%;"></div>
+                    <div class="stat-progress-bar-resolved" style="width: ${estResolvedPct}%;"></div>
+                </div>
+            </div>
         `;
     }).join("");
 }
